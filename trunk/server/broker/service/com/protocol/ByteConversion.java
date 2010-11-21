@@ -46,10 +46,11 @@ public class ByteConversion {
 		
 		if ( v == null )
 			v = new byte[8];
+			
 		
 		for(int i=0; i < v.length; i++) {
 		
-			v[i+toOffset] = (byte)((l>>>(i*8))&0xFF);
+			v[i+toOffset] = (byte)((l>>>((7-i)*8))&0xFF);
 		
 		}
 		

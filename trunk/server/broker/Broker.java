@@ -78,6 +78,10 @@ public class Broker {
 	
 	}
 	
+	/**
+	 * This method needs to be called to initialize the communication with the registrar
+	 * and to enable the Broker to communicate with other objects.
+	 */
 	public void init() {
 	
 		this.netService.createSocket();
@@ -85,6 +89,11 @@ public class Broker {
 	
 	}
 	
+	/**
+	 * The method stores a callback object at the Broker, it will get informed about
+	 * received Messages and in case of joining or leaving objects.
+	 * @param bcb BrokerCallBack object
+	 */
 	public void registerCallBack(BrokerCallBack bcb) {
 	
 		bcb.setBroker(this);
@@ -92,9 +101,24 @@ public class Broker {
 	
 	}
 	
-	public Message send(Message m) {
+	/**
+	 * The method sends the Message to it's receiver, the destination will be determined by the
+	 * objectID field in the Message header.
+	 * @param m, Message that shall be send
+	 */
+	public void send(Message m) {
 	
-		return null;
+	
+	}
+	
+	/**
+	 * The method sends the Message to all available receiver objects, this is used to inform
+	 * all objects about changes in one object, therefore the objectID shall contain the value
+	 * of the object that changed.
+	 * @param m, Message that shall be broadcasted
+	 */	
+	public void sendBroadcast(Message m) {
+	
 	
 	}
 	
