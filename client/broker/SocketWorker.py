@@ -4,7 +4,10 @@ from socket import *
 #import Broker import *
 from Message import *
 
-
+"""
+The SocketWorker handles incoming data form a socket. This is done in its own Thread, so that
+each SocketWorker its own Thread executes.
+"""
 class SocketWorker(threading.Thread):
 
     def __init__(self, b):
@@ -21,6 +24,18 @@ class SocketWorker(threading.Thread):
             print "[SocketWorker] Packet received from ", client[0] , "(server=",self._broker._serverAddress,")"
             if cmp(self._broker._serverAddress,client[0]) == 0:
                 m = Message()
+                r = Message()
+
+                # decode bytesequence
                 m.decodeBER(message)
-                self._broker._callBack.receive(m)   
-            
+
+                # prepare response message
+                r._sessionID = m._sessionID
+                r._objectID = m._objectID
+                r._requestID = m._requestID
+
+                # callback
+                r = self._broker._callBack.receive(m, r)   
+
+                if r != 0:
+                    self._broker.send(r)
