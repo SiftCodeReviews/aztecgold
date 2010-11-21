@@ -1,6 +1,8 @@
 package broker;
 
+import broker.object.BrokerCallBack;
 import broker.service.com.*;
+import broker.service.com.protocol.*;
 import broker.service.index.*;
 
 /**
@@ -33,6 +35,11 @@ public class Broker {
 	 * The CommunicationService used by the Broker
 	 */
 	private MessageRouterService routService = null;
+	
+	/**
+	 * TEMPORARY SOLUTION, until the indexservice is working
+	 */
+	private BrokerCallBack callBackObject;
 
 
 	
@@ -54,7 +61,6 @@ public class Broker {
 
 		/* NetworkService */
 		this.netService = new NetworkService();
-		this.netService.createSocket();
 		this.netService.setNextService(this.proService);
 
 	}
@@ -69,6 +75,26 @@ public class Broker {
 			Broker.instance = new Broker();
 	
 		return Broker.instance;
+	
+	}
+	
+	public void init() {
+	
+		this.netService.createSocket();
+	
+	
+	}
+	
+	public void registerCallBack(BrokerCallBack bcb) {
+	
+		bcb.setBroker(this);
+		this.callBackObject = bcb;
+	
+	}
+	
+	public Message send(Message m) {
+	
+		return null;
 	
 	}
 	

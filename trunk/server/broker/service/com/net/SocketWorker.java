@@ -99,7 +99,7 @@ public class SocketWorker implements Runnable {
 			buffer = new byte[1024];
 			p = new DatagramPacket(buffer, buffer.length);
 			
-			System.out.println("[SocketWorker] run() - waiting for packet");
+			System.out.println("[SocketWorker] run() - waiting for packet on socket " + this.socket.getLocalSocketAddress());
 			
 			/* wait on socket for the next packet */
 			try {
@@ -113,7 +113,7 @@ public class SocketWorker implements Runnable {
 			
 			};
 
-			System.out.println("[SocketWorker] run() - packet received "+ p);
+			System.out.println("[SocketWorker] run() - packet received "+ p + " on socket " + this.socket.getLocalSocketAddress());
 
 			/* load packet to packetworker and process it in parallel */
 			pw = new PacketWorker(p, this);
