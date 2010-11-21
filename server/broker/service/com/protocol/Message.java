@@ -10,6 +10,8 @@ public class Message {
 	private int objectID	= 0;
 	
 	private int sessionID	= 0;
+
+	private int requestID	= 0;
 	
 	private Hashtable<String,MessageField> data;
 	
@@ -50,6 +52,12 @@ public class Message {
 	void setData(Hashtable<String,MessageField> data) {
 	
 		this.data = data;
+	
+	}
+	
+	public int getFieldNumber() {
+	
+		return this.data.size();
 	
 	}
 	

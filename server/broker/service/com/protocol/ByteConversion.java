@@ -40,6 +40,23 @@ public class ByteConversion {
 	
 	}
 	
+	public static byte[] longToByte(long l, byte[] to, int toOffset) {
+	
+		byte[] v = to;
+		
+		if ( v == null )
+			v = new byte[8];
+		
+		for(int i=0; i < v.length; i++) {
+		
+			v[i+toOffset] = (byte)((l>>>(i*8))&0xFF);
+		
+		}
+		
+		return v;
+	
+	}
+	
 }
 
 
