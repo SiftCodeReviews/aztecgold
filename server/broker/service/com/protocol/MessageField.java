@@ -16,7 +16,7 @@ public abstract class MessageField {
 	public static final byte TYPE_DOUBLE	= TYPE_PREBYTE | 0x03;
 	public static final byte TYPE_BYTE		= TYPE_PREBYTE | 0x04;
 	public static final byte TYPE_SHORT		= TYPE_PREBYTE | 0x05;
-	public static final byte TYPE_OID		= TYPE_PREBYTE | 0x06;
+	public static final byte TYPE_BOOLEAN	= TYPE_PREBYTE | 0x06;
 	public static final byte TYPE_LONG		= TYPE_PREBYTE | 0x07;
 	
 	/**
@@ -85,7 +85,7 @@ public abstract class MessageField {
 			case TYPE_DOUBLE:	res = Double.class;		break;
 			case TYPE_BYTE:		res = Byte.class;		break;
 			case TYPE_SHORT:	res = Short.class;		break;
-			case TYPE_OID:		res = Integer.class;	break;
+			case TYPE_BOOLEAN:	res = Boolean.class;	break;
 			case TYPE_LONG:		res = Long.class;		break;
 		}
 		
@@ -126,20 +126,35 @@ public abstract class MessageField {
 				case TYPE_STRING:	res = new StringField();		
 									tupelStart = res.parseBERData(m, tupelStart);
 									break;
-				/*
-				case TYPE_INTEGER:	res = Integer.class;	break;
-				case TYPE_DOUBLE:	res = Double.class;		break;
-				case TYPE_BYTE:		res = Byte.class;		break;
-				case TYPE_SHORT:	res = Short.class;		break;
-				case TYPE_OID:		res = Integer.class;	break;
-				case TYPE_LONG:		res = Long.class;		break;
-				*/
+				case TYPE_INTEGER:	res = new IntegerField();		
+									tupelStart = res.parseBERData(m, tupelStart);
+									break;
+				case TYPE_DOUBLE:	res = new DoubleField();		
+									tupelStart = res.parseBERData(m, tupelStart);
+									break;
+				case TYPE_BYTE:		res = new ByteField();		
+									tupelStart = res.parseBERData(m, tupelStart);
+									break;
+				case TYPE_SHORT:	res = new ShortField();		
+									tupelStart = res.parseBERData(m, tupelStart);
+									break;
+				case TYPE_BOOLEAN:	res = new BooleanField();		
+									tupelStart = res.parseBERData(m, tupelStart);
+									break;
+				case TYPE_LONG:		res = new LongField();		
+									tupelStart = res.parseBERData(m, tupelStart);
+									break;
+
 			}
 			
 			//System.out.println("[MessageField] parseBERData() - tupelStart="+tupelStart+"; length="+length);
 			
-			if ( res != null )
+			if ( res != null ) {
+			
 				data.put(res.getName(), res);
+				System.out.println(res);
+			
+			}
 			
 			if ( tupelStart >= length ) {
 				//System.out.println("[MessageField] parseBERData() - Reached end!");
@@ -148,9 +163,16 @@ public abstract class MessageField {
 			
 		}
 	
-		System.out.println("[MessageField] parseBERData() - returning " + data.size() +" MessageField object(s)");
+	
+		//System.out.println("[MessageField] parseBERData() - returning " + data.size() +" MessageField object(s)");
 	
 		return data;
+	
+	}
+	
+	public String toString() {
+	
+		return String.format("[MessageField: type=0x%X; name=%s; value=%s]",this.type, this.name, this.value);
 	
 	}
 	

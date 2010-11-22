@@ -43,7 +43,7 @@ public class NetworkService extends BrokerServiceWrapper {
 		while ( !created ) {
 		
 			//port = (int)(1025 + Math.random() * 64512);
-			port = 2034;
+			port = 2038;
 		
 			/* creating a default socket */
 			try {

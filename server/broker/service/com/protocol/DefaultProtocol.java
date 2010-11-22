@@ -29,6 +29,7 @@ public class DefaultProtocol extends Protocol {
 			int hashLength		= 0;
 			boolean error		= false;
 			int nextIndex		= 4;
+			int hash			= 0;
 			
 			/* determine session id length */
 			sessionIDLength = 1+((mstream[2]>>>6)&0x03);
@@ -51,13 +52,18 @@ public class DefaultProtocol extends Protocol {
 			
 			headerLength += objectIDLength + sessionIDLength + hashLength + requestIDLength;
 			
-			int sessionID	= ByteConversion.toInteger(mstream, nextIndex, 4);
+			int sessionID	= (int)ByteConversion.byteToLong(mstream, nextIndex, 4);
 			nextIndex		+= sessionIDLength;
-			int requestID	= ByteConversion.toInteger(mstream, nextIndex, 4);
+			int requestID	= (int)ByteConversion.byteToLong(mstream, nextIndex, 4);
 			nextIndex		+= requestIDLength;			
-			int objectID	= ByteConversion.toInteger(mstream, nextIndex, 4);
-			nextIndex		+= objectIDLength;			
-			int hash		= ByteConversion.toInteger(mstream, nextIndex, 4);
+			int objectID	= (int)ByteConversion.byteToLong(mstream, nextIndex, 4);
+			
+			if ( hashLength != 0 ) {
+			
+				nextIndex		+= objectIDLength;			
+				hash		= (int)ByteConversion.byteToLong(mstream, nextIndex, 4);
+				
+			}
 			
 			System.out.println(String.format("[DefaultProtocol] sessionID = 0x%X", sessionID));
 			System.out.println(String.format("[DefaultProtocol] requestID = 0x%X", requestID));

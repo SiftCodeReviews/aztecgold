@@ -22,7 +22,7 @@ public class MessageRouterService extends BrokerServiceWrapper {
 		//if ( this.nextService != null )
 		//	r = this.nextService.sapLowerLayer(c);
 	
-		return r;
+		return null;
 	
 	}
 }
