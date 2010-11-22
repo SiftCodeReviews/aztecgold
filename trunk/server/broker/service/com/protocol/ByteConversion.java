@@ -5,15 +5,15 @@ package broker.service.com.protocol;
  */
 public class ByteConversion {
 
-	public static int toInteger(byte[] b, int offset, int length) {
+	public static long byteToLong(byte[] b, int offset, int length) {
 	
-		int result = 0;
+		long result = 0;
 	
 		for(int i=0; i < length; i++) {
 				
 			result = (result<<8);
 			result = (result|(b[offset+i]&0xFF));
-		
+					
 		}
 		
 		return result;
@@ -40,23 +40,24 @@ public class ByteConversion {
 	
 	}
 	
-	public static byte[] longToByte(long l, byte[] to, int toOffset) {
+	public static byte[] longToByte(long l, int longByteLength, byte[] to, int toOffset) {
 	
 		byte[] v = to;
 		
 		if ( v == null )
-			v = new byte[8];
+			v = new byte[longByteLength];
 			
 		
-		for(int i=0; i < v.length; i++) {
+		for(int i=0; i < longByteLength; i++) {
 		
-			v[i+toOffset] = (byte)((l>>>((7-i)*8))&0xFF);
+			v[i+toOffset] = (byte)((l>>>((longByteLength-1-i)*8))&0xFF);
 		
 		}
 		
 		return v;
 	
 	}
+	
 	
 }
 

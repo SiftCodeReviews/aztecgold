@@ -108,7 +108,7 @@ public class StringField extends MessageField {
 				if ( (length&0x80) != 0 ) {
 				
 					int bytes = length&0x7F;
-					length = ByteConversion.toInteger(data, offset+2, bytes);
+					length = (int)ByteConversion.byteToLong(data, offset+2, bytes);
 					offset = offset+bytes;
 					
 					//System.out.println(String.format("length=0x%X, bytes=%d", length, bytes));
