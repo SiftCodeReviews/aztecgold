@@ -14,33 +14,32 @@ class BrokerCallBack:
     The method will be invoked in case a message for the server is arrived. The request message from the 
     client will be given and a prepared response message, in case the server wants to repsond he can
     use the response message, fill in the fields needed and in order to signal that the response shall
-    be send, it returns it. In case no response shall be send, the method shall return Null. In case 
-    a broadcast shall be send out the method shall return Null but the response message can be used to
-    call the Broker method sendBroadcast().
+    be send, it returns it. In case no response shall be send, the method shall return 0.
     
     request Message from the client
-    response prepared Message that the server shall use to respond to the client
-    returns the response Message parameter for a unicast response or Null in all other cases
+    response prepared Message that the client shall use to respond
+    returns the response Message parameter for a unicast response or 0 in all other cases
     """
     def receive(self, request, response):
 
-        print "[BrokerCallBack] receive() - Message with ", request.getFieldNumber() , " field(s) received"
-
         # reading a prepared message from the server
-        double = request.getDouble('doub')
-
-        #to be sure checking double value but maybe not necessary every time
-        if Message.NaN == double:
-            print "[BrokerCallBack] Value is NaN"
-        else:
-            print "[BrokerCallBack] Field[doub]: ", double
-
-        print "[BrokerCallBack] Field[name]: ", request.getString("name")
-        print "[BrokerCallBack] Field[lname]: ", request.getString("lname")
+        print "[BrokerCallBack] receive() - Message with ", request.getFieldNumber() , " field(s) received"
+        print request.toString()
 
         #just a little test, on every incoming message the client sends out this message
         response.setString("mid","moveReq")
-        response.setDouble("x", 1.65)
-        response.setDouble("y", 1.65)
-
+        response.setByte("byte -1", -1)
+        response.setByte("byte 1", 1)
+        response.setByte("byte 0", 0)
+        response.setByte("byte 127", 127)
+        response.setInteger("int -1032", -1032)
+        response.setInteger("int 1032", 1032)
+        response.setLong("int -121238", -121238)
+        response.setDouble("double -231.12", -231.12)
+        response.setByte("byte 61", 61)
+        response.setLong("long 1000000", 1000000)
+        response.setShort("short 32400",32400)
+        response.setByte("byte 127", 127)
+        response.setBoolean("bool true", True)
+        
         return response

@@ -22,11 +22,45 @@ public class Message {
 	
 	}
 	
-	public Message(int objectID, int sessionID) {
+	public Message(Message m) {
 	
-		this.data	= new Hashtable<String,MessageField>();
+		this();
+		
+		this.objectID	= m.objectID;
+		this.sessionID	= m.sessionID;
+		this.requestID	= m.requestID;
+		
+	}
+	
+	public Message(int sessionID, int requestID, int objectID) {
+	
+		this();
+
+		this.objectID = objectID;
+		this.sessionID = sessionID;
+		this.requestID = requestID;
 	
 	}
+	
+	public int getObjectID() {
+	
+		return this.objectID;
+	
+	}
+	
+	public int getRequestID() {
+	
+		return this.requestID;
+	
+	}
+	
+	public int getSessionID() {
+	
+		return this.sessionID;
+	
+	}
+	
+	
 	
 	public void setString(String name, String value) {
 	
@@ -183,10 +217,33 @@ public class Message {
 	
 	}
 	
+	Hashtable<String,MessageField> getData() {
+	
+		return this.data;
+	
+	}
+	
 	public int getFieldNumber() {
 	
 		return this.data.size();
 	
+	}
+	
+	public String toString() {
+	
+		String str = String.format("[Message: HEADER[sessionID=0x%X, requestID=0x%X, objectID=0x%X]; DATA[", this.sessionID, this.requestID, this.objectID);
+		
+		Enumeration<MessageField> fields = this.data.elements();
+		
+		while( fields.hasMoreElements() ) {
+		
+			str += fields.nextElement().toString();
+		
+		}
+		
+		str += "]";
+	
+		return str;
 	}
 	
 }

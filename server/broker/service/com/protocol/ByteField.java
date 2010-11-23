@@ -22,33 +22,30 @@ public class ByteField extends MessageField {
 		
 	}
 
-	public byte[] generateBERData() {
+	public int generateBERData(byte[] data, int offset) {
 	
-		byte[] name = this.name.getBytes();
-						
-		int length = 5 + name.length;
-		byte[] res = new byte[length];
-		int nextIndex = 0;
+		byte[] name		= this.name.getBytes();
+		int nextIndex	= offset;
 		
 		/* 
 		 * 1. TLV for FID 
 		 */
-			res[0]				= MessageField.TYPE_STRING;
-			res[1]				= (byte)(name.length&0x7F);
-			nextIndex			= ByteConversion.copyBytes(name, 0, res, 2, name.length);
+			data[nextIndex]		= MessageField.TYPE_STRING;
+			data[++nextIndex]	= (byte)(name.length&0x7F);
+			nextIndex			= ByteConversion.copyBytes(name, 0, data, ++nextIndex, name.length);
 	
 		/* 
 		 * 2. TLV for Value 
 		 */
-			res[nextIndex]		= this.type;
+			data[nextIndex]		= this.type;
 			
 			/* store number of bytes for the length field */
-			res[++nextIndex]	= (byte)this.lengthInByte;
+			data[++nextIndex]	= (byte)this.lengthInByte;
 
 			/* copy contents */
-			res[++nextIndex]	= ((Byte)this.value).byteValue();
+			data[++nextIndex]	= ((Byte)this.value).byteValue();
 
-		return res;
+		return ++nextIndex;
 	
 	}
 	
@@ -74,10 +71,6 @@ public class ByteField extends MessageField {
 			
 				length = data[offset+1];				
 				byte bvalue = data[offset+2];
-				
-				for(int i=0; i < 1; i++)
-					System.out.println(String.format("0x%X",data[offset+2+i]));
-				
 				offset = offset+2+length;
 				
 				this.value = new Byte(bvalue);
@@ -90,6 +83,12 @@ public class ByteField extends MessageField {
 	
 		/* return next position */
 		return offset;
+	
+	}
+
+	public int getBERDataSize() {
+	
+		return 5 + name.length();
 	
 	}
 	

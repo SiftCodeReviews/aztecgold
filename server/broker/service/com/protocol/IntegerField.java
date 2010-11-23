@@ -22,33 +22,30 @@ public class IntegerField extends MessageField {
 		
 	}
 
-	public byte[] generateBERData() {
+	public int generateBERData(byte[] data, int offset) {
 	
+		int nextIndex = offset;
 		byte[] name = this.name.getBytes();
-						
-		int length = 8 + name.length;
-		byte[] res = new byte[length];
-		int nextIndex = 0;
-		
+				
 		/* 
 		 * 1. TLV for FID 
 		 */
-			res[0]				= MessageField.TYPE_STRING;
-			res[1]				= (byte)(name.length&0x7F);
-			nextIndex			= ByteConversion.copyBytes(name, 0, res, 2, name.length);
+			data[offset]		= MessageField.TYPE_STRING;
+			data[offset+1]		= (byte)(name.length&0x7F);
+			nextIndex			= ByteConversion.copyBytes(name, 0, data, offset+2, name.length);
 	
 		/* 
 		 * 2. TLV for Value 
 		 */
-			res[nextIndex]		= this.type;
+			data[nextIndex]	= this.type;
 			
 			/* store number of bytes for the length field */
-			res[++nextIndex]	= (byte)this.lengthInByte;
+			data[++nextIndex]	= (byte)this.lengthInByte;
 			
 			/* copy contents */
-			ByteConversion.longToByte( ((Integer)this.value).intValue(), this.lengthInByte, res, ++nextIndex );
+			ByteConversion.longToByte( ((Integer)this.value).intValue(), this.lengthInByte, data, ++nextIndex );
 	
-		return res;
+		return nextIndex+this.lengthInByte;
 	
 	}
 	
@@ -74,15 +71,11 @@ public class IntegerField extends MessageField {
 			
 				length = data[offset+1];				
 				int bvalue = (int)ByteConversion.byteToLong(data, offset+2, length);
-				
-				for(int i=0; i < 4; i++)
-					System.out.println(String.format("0x%X",data[offset+2+i]));
-				
 				offset = offset+2+length;
 				
 				this.value = new Integer(bvalue);
 			
-				System.out.println("[IntegerField] parseBERData() - name="+this.name + "; value="+this.value);
+				//System.out.println("[IntegerField] parseBERData() - name="+this.name + "; value="+this.value);
 			
 			}
 			
@@ -90,6 +83,12 @@ public class IntegerField extends MessageField {
 	
 		/* return next position */
 		return offset;
+	
+	}
+	
+	public int getBERDataSize() {
+	
+		return 8 + name.length();
 	
 	}
 	

@@ -22,34 +22,31 @@ public class DoubleField extends MessageField {
 		
 	}
 
-	public byte[] generateBERData() {
+	public int generateBERData(byte[] data, int offset) {
 	
 		byte[] name = this.name.getBytes();
-						
-		int length = 12 + name.length;
-		byte[] res = new byte[length];
-		int nextIndex = 0;
+		int nextIndex = offset;
 		
 		/* 
 		 * 1. TLV for FID 
 		 */
-			res[0]				= MessageField.TYPE_STRING;
-			res[1]				= (byte)(name.length&0x7F);
-			nextIndex			= ByteConversion.copyBytes(name, 0, res, 2, name.length);
+			data[nextIndex]		= MessageField.TYPE_STRING;
+			data[++nextIndex]	= (byte)(name.length&0x7F);
+			nextIndex			= ByteConversion.copyBytes(name, 0, data, ++nextIndex, name.length);
 	
 		/* 
 		 * 2. TLV for Value 
 		 */
-			res[nextIndex]		= this.type;
+			data[nextIndex]		= this.type;
 			
 			/* store number of bytes for the length field */
-			res[++nextIndex]	= (byte)this.lengthInByte;
+			data[++nextIndex]	= (byte)this.lengthInByte;
 			
 			/* copy contents */
 			long doubleInlong = Double.doubleToRawLongBits(((Double)this.value).doubleValue());
-			ByteConversion.longToByte(doubleInlong, this.lengthInByte, res, ++nextIndex );
+			ByteConversion.longToByte(doubleInlong, this.lengthInByte, data, ++nextIndex );
 	
-		return res;
+		return nextIndex + this.lengthInByte;
 	
 	}
 	
@@ -85,6 +82,12 @@ public class DoubleField extends MessageField {
 	
 		/* return next position */
 		return offset;
+	
+	}
+	
+	public int getBERDataSize() {
+	
+		return 12 + name.length();
 	
 	}
 	

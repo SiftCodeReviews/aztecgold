@@ -1,11 +1,23 @@
 package broker.service.com.protocol;
 
 import java.net.*;
+import java.util.*;
 
 /**
  * 
  */
 public class DefaultProtocol extends Protocol {
+
+	public static final int SESSION_ID_LENGTH = 4;
+
+	public static final int REQUEST_ID_LENGTH = 4;
+
+	public static final int OBJECT_ID_LENGTH = 4;
+
+	public static final boolean HASH_USED = false;
+	
+			
+							
 
 	public DefaultProtocol() {
 	
@@ -13,7 +25,6 @@ public class DefaultProtocol extends Protocol {
 	
 	}
 	
-
 	public Message assemble(byte[] mstream, int length) throws ProtocolException {
 	
 		Message m = null;
@@ -65,16 +76,16 @@ public class DefaultProtocol extends Protocol {
 				
 			}
 			
-			System.out.println(String.format("[DefaultProtocol] sessionID = 0x%X", sessionID));
-			System.out.println(String.format("[DefaultProtocol] requestID = 0x%X", requestID));
-			System.out.println(String.format("[DefaultProtocol] objectID = 0x%X", objectID));
-			System.out.println(String.format("[DefaultProtocol] hash = 0x%X", hash));
-			System.out.println("[DefaultProtocol] Header length = " + headerLength);
+			//System.out.println(String.format("[DefaultProtocol] sessionID = 0x%X", sessionID));
+//			System.out.println(String.format("[DefaultProtocol] requestID = 0x%X", requestID));
+//			System.out.println(String.format("[DefaultProtocol] objectID = 0x%X", objectID));
+//			System.out.println(String.format("[DefaultProtocol] hash = 0x%X", hash));
+//			System.out.println("[DefaultProtocol] Header length = " + headerLength);
 			
 			/* create message and insert parsed data */
-			m = new Message(objectID,sessionID);
+			m = new Message(sessionID,requestID,objectID);
 			m.setData( MessageField.parseBERData(mstream, headerLength, length) );
-		
+			
 		}
 		
 		/* protocol id incorrect */
@@ -88,7 +99,50 @@ public class DefaultProtocol extends Protocol {
 	
 	public byte[] disassemble(Message m) {
 		
-		return null;
+		Hashtable<String,MessageField> md = m.getData();
+		Enumeration<MessageField> mde = md.elements();
+		
+		/* determine total encoded message size */
+		int offset = 4;		
+		int headerSize = offset + SESSION_ID_LENGTH + REQUEST_ID_LENGTH + OBJECT_ID_LENGTH;
+		int totalSize = headerSize;
+		while(mde.hasMoreElements())
+			totalSize += mde.nextElement().getBERDataSize();
+		
+		/* create buffer for encoded message */
+		byte[] mb = new byte[totalSize];
+		byte flags = 0;
+		
+		/* add the header */
+		mb[0]	= (byte)(this.protocolID>>8);
+		mb[1]	= (byte)(this.protocolID&0xFF);	
+		
+		flags	= (byte)(flags | ((SESSION_ID_LENGTH-1)<<6));
+		flags	= (byte)(flags | ((REQUEST_ID_LENGTH-1)<<4));
+		flags	= (byte)(flags | ((OBJECT_ID_LENGTH-1)<<2));
+		flags	= (byte)(flags | ((HASH_USED?1:0)<<1));
+		mb[2]	= flags;
+				
+		ByteConversion.longToByte(m.getSessionID(), SESSION_ID_LENGTH, mb, offset);
+		offset += SESSION_ID_LENGTH;
+		
+		ByteConversion.longToByte(m.getRequestID(), REQUEST_ID_LENGTH, mb, offset);
+		offset += REQUEST_ID_LENGTH;
+
+		ByteConversion.longToByte(m.getObjectID(), OBJECT_ID_LENGTH, mb, offset);
+		offset += OBJECT_ID_LENGTH;
+		
+		/* add the fields */
+		mde = md.elements();
+		while(mde.hasMoreElements())
+			offset = (mde.nextElement()).generateBERData(mb, offset);
+		/*
+		for(int i=0; i < totalSize; i++)
+			System.out.print(String.format("0x%X ", mb[i]));
+		
+		System.out.println();
+		*/
+		return mb;
 	
 	}
 	

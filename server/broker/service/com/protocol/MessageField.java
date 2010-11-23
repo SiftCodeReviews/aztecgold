@@ -45,7 +45,7 @@ public abstract class MessageField {
 	 * Both are ASN1 BER encoded that means they are existing as TLV values.
 	 * @see http://luca.ntop.org/Teaching/Appunti/asn1.html
 	 */
-	public abstract byte[] generateBERData();
+	public abstract int generateBERData(byte[] data, int offset);
 	
 	/**
 	 * The method parses the given byte array for the needed data to fill the object.
@@ -55,6 +55,13 @@ public abstract class MessageField {
 	 * @see http://luca.ntop.org/Teaching/Appunti/asn1.html
 	 */
 	public abstract int parseBERData(byte[] data, int offset);
+	
+	/**
+	 * The method informs upfront about the size of the field when BER encoded.
+	 * @return number of bytes expected
+	 */
+	public abstract int getBERDataSize();
+	
 	
 	public Object getValue() {
 	
@@ -152,7 +159,6 @@ public abstract class MessageField {
 			if ( res != null ) {
 			
 				data.put(res.getName(), res);
-				System.out.println(res);
 			
 			}
 			
