@@ -40,5 +40,9 @@ public abstract class BrokerServiceWrapper implements BrokerService {
 		return this.previousService;	
 	
 	}
+	
+	public Object sapUpperLayer(Object c) {return null;}
+
+	public Object sapLowerLayer(Object c) {return null;}
 
 }

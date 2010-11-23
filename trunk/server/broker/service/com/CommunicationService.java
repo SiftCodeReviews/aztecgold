@@ -9,13 +9,20 @@ public class CommunicationService extends BrokerServiceWrapper {
 
 	public Object sapUpperLayer(Object c) {
 	
+		//System.out.println("[CommunicationService] sapUpperLayer()");
+		
+		BrokerService p = this.getPreviousService();
+		
+		if ( p != null )
+			p.sapUpperLayer(c);
+	
 		return null;
 	
 	}
 
 	public Object sapLowerLayer(Object c) {
 	
-		System.out.println("[CommunicationService] sapLowerLayer()");
+		//System.out.println("[CommunicationService] sapLowerLayer()");
 	
 		Object r = null;
 	

@@ -28,13 +28,26 @@ public class ProtocolService extends BrokerServiceWrapper {
 
 	public Object sapUpperLayer(Object c) {
 	
+		//System.out.println("[ProtocolService] sapUpperLayer()");
+	
+		BrokerService p = this.getPreviousService();
+		byte[] mb		= this.usedProtocol.disassemble((Message)c);
+		
+		if ( p != null && mb != null ) {
+		
+			ByteSequence bs = new ByteSequence(mb, mb.length);
+			bs.setMessage((Message)c);
+			p.sapUpperLayer(bs);
+			
+		}
+	
 		return null;
 	
 	}
 
 	public Object sapLowerLayer(Object c) {
 	
-		System.out.println("[ProtocolService] sapLowerLayer()");
+		//System.out.println("[ProtocolService] sapLowerLayer()");
 	
 		Object r = null;
 		

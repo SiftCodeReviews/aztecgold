@@ -21,7 +21,7 @@ class SocketWorker(threading.Thread):
 
         while 1:
             message, client = self._socket.recvfrom(4096)
-            print "[SocketWorker] Packet received from ", client[0] , "(server=",self._broker._serverAddress,")"
+            print "[SocketWorker] Packet received from ", client[0] ,":",client[1],"(server=",self._broker._serverAddress,":",self._broker._serverPort,")"
             if cmp(self._broker._serverAddress,client[0]) == 0:
                 m = Message()
                 r = Message()

@@ -38,25 +38,31 @@ class Message:
                 self._hash = 0
 
         """
-        The method takes an integer value with a byte length and creates a not ascii string.  
+        The method takes an integer value with a byte length and creates a not ascii string.
+        integer is the value converted for external representation and the last optional parameter
+        is the internal representation, this is used to create the correct string
         """
-        def _IntegerToString(self, integer, length):
+        def _IntegerToString(self, integer, length, internalRepresenation=-0):
                 value = str()
                 i = 1
                 reallength = 0
                 shift = 0
 
-                #print "_IntegerToString(",integer,")"
+                #print "_IntegerToString(",integer,", ",internalRepresenation,")"
 
-                if integer > 0:
-                        reallength = int(math.ceil(math.log(integer, 256)))                     
+                #internal integer is negative, this needs to be converted
+                if integer != internalRepresenation:
+                        reallength = length
+                elif internalRepresenation > 0:
+                        reallength = int(math.ceil(math.log(internalRepresenation, 255)))          
 
-                        if reallength > 0:
-                                shift = reallength-1
-                        else:
-                                reallength = 1
+                #in case reallength is non-zero a shift value is set
+                if reallength > 0:
+                        shift = reallength-1
+                else:
+                        reallength = 1
 
-                                
+                #create the actual string/bytesequence  
                 while i <= length:
 
                         #print "length=",length,"; reallength=",reallength,"; shift=",shift
@@ -64,6 +70,7 @@ class Message:
                         if i <= (length-reallength):
                                 value = value + chr(0)
                         else:
+                                #print "byte=",  (integer>>(shift*8)) & 0xFF
                                 value = value + chr( (integer>>(shift*8)) & 0xFF )
                                 shift -= 1
 
@@ -83,6 +90,9 @@ class Message:
                 i = 0
                 index = 0
 
+                #print "_StringToInteger(",byteSequence,")"
+                # check for negative value
+               
                 while i < length:
                         value = (value<<8)
                         index = offset + i
@@ -91,6 +101,52 @@ class Message:
                         i += 1
 
                 return value
+
+        """
+        Convert from a external signed integer with arbritrary length to an internal signed integer
+        """
+        def _convertToLocalInteger(self, integer, lengthInByte):
+
+                neg = integer>>((lengthInByte*8)-1)
+                if neg != 0:
+                        #print "negative=", bin(integer)
+                        toggle = 0xFFFFFFFFFFFFFFFF
+                        #print "toggle=", bin(toggle)
+                        toggle = toggle>>((8-lengthInByte)*8)
+                        #print "toggle=", bin(toggle)
+                        integer = abs(integer) ^ toggle
+                        #print "integer=", bin(integer)
+                        integer +=1
+                        integer = integer *(-1)
+
+                return integer
+
+        """
+        The method is used to convert from the internal signed integer represenation to the external signed integer representation.
+        It also tests if the value is allowed in the external format, in case not, it'll throw an exception.
+        """
+        def _convertToExternalInteger(self, integer, lengthInByte):
+
+                maxInt = (1<<((lengthInByte*8)-1))-1
+                minInt = (-1)*(1<<((lengthInByte*8)-1))
+
+                #print "bytes=",lengthInByte,"; max=", maxInt,"; min=", minInt
+
+                if integer < minInt or integer > maxInt:
+                        raise ValueError("_convertToExternalInteger() Input value ("+str(integer)+") not in range ["+str(minInt)+","+str(maxInt)+"]")
+
+                if integer < 0:
+                        toggle = 0xFFFFFFFFFFFFFFFF
+                        #print "toggle=", bin(toggle)
+                        toggle = toggle>>((8-lengthInByte)*8)
+                        #print "toggle=", bin(toggle)
+                        #print "integer=", bin(integer)
+                        integer = abs(integer) ^ toggle
+                        #print "integer=", bin(integer)
+                        integer +=1
+                        #print "integer=", bin(integer)
+                        
+                return integer
 
         """
         The method returns the number of data fields stored in the message
@@ -102,16 +158,16 @@ class Message:
                 self._data[name] = (Message.TYPE_STRING, value)
 
         def setInteger(self, name, value):
-               self._data[name] = (Message.TYPE_INTEGER, self._IntegerToString(value, 4))
+                self._data[name] = (Message.TYPE_INTEGER, self._IntegerToString(self._convertToExternalInteger(value,4), 4, value))
 
         def setLong(self, name, value):
-               self._data[name] = (Message.TYPE_LONG, self._IntegerToString(value, 8))
+               self._data[name] = (Message.TYPE_LONG, self._IntegerToString(self._convertToExternalInteger(value,8), 8, value))
 
         def setShort(self, name, value):
-                 self._data[name] = (Message.TYPE_SHORT, self._IntegerToString(value, 2))
+                 self._data[name] = (Message.TYPE_SHORT, self._IntegerToString(self._convertToExternalInteger(value,2), 2, value))
 
         def setByte(self, name, value):
-                self._data[name] = (Message.TYPE_BYTE, chr(value))
+                self._data[name] = (Message.TYPE_BYTE, self._IntegerToString(self._convertToExternalInteger(value,1), 1, value))
 
         def setBoolean(self, name, value):
                 boolean = 0xFF
@@ -122,13 +178,13 @@ class Message:
                 self._data[name] = (Message.TYPE_BOOLEAN, chr(boolean))
 
         def setDouble(self, name, value):
-                v1 = int(value)
-                v2 = value - v1
+                v1 = abs(int(value))
+                v2 = abs(value) - v1
                 binp1 = []
                 binp2 = []
                 binp3 = []
 
-                #print "part 1 start"
+                #print "part 1 start ", v1
 
                 #converting part 1 of the decimal value (before the comma)
                 while v1 > 0:
@@ -192,7 +248,7 @@ class Message:
                         i += 1
                         result = (result<<1)|bit
 
-                self._data[name] = (Message.TYPE_DOUBLE, self._IntegerToString(result, 8)) 
+                self._data[name] = (Message.TYPE_DOUBLE, self._IntegerToString(result, 8, result)) 
                
         """
         Returns a string if the field is existing or an empty string
@@ -208,7 +264,7 @@ class Message:
         """
         def getLong(self, name):
                 if name in self._data and self._data[name][0] == Message.TYPE_LONG:
-                        return self._StringToInteger(self._data[name][1], 0, len(self._data[name][1]))
+                        return self._convertToLocalInteger(self._StringToInteger(self._data[name][1], 0, len(self._data[name][1])),8)
                 else:
                         return Message.NaN
 
@@ -217,7 +273,7 @@ class Message:
         """
         def getInteger(self, name):
                 if name in self._data and self._data[name][0] == Message.TYPE_INTEGER:
-                        return self._StringToInteger(self._data[name][1], 0, len(self._data[name][1]))
+                        return self._convertToLocalInteger(self._StringToInteger(self._data[name][1], 0, len(self._data[name][1])),4)
                 else:
                         return Message.NaN
 
@@ -226,7 +282,7 @@ class Message:
         """
         def getShort(self, name):
                 if name in self._data and self._data[name][0] == Message.TYPE_SHORT:
-                        return self._StringToInteger(self._data[name][1], 0, len(self._data[name][1]))
+                        return self._convertToLocalInteger(self._StringToInteger(self._data[name][1], 0, len(self._data[name][1])),2)
                 else:
                         return Message.NaN
 
@@ -234,8 +290,8 @@ class Message:
         Returns an 2 Byte signed integer or NaN if the field is existing.
         """
         def getByte(self, name):
-                if name in self._data and self._data[name][0] == Message.TYPE_INTEGER:
-                        return ord(self._data[name][1])
+                if name in self._data and self._data[name][0] == Message.TYPE_BYTE:
+                        return self._convertToLocalInteger(self._StringToInteger(self._data[name][1], 0, len(self._data[name][1])), 1)
                 else:
                         return Message.NaN
 
@@ -453,3 +509,40 @@ class Message:
           
                 #print "Fields in Message: ", len(self._data)
                 return True
+
+        """
+        The method returns a String representation of this message object including header and all data fields.
+        """
+        def toString(self):
+                data = str()
+                iterator = self._data.iteritems()
+
+                data += "[Message: HEADER[sessionID="+hex(self._sessionID)+"; requestID="+hex(self._requestID)+"; objectID=" + hex(self._objectID) + "]; DATA["
+
+                while True:
+                        try:
+                                field = iterator.next()
+
+                                if field[1][0] == Message.TYPE_LONG:
+                                        data += "[MessageField: type="+hex(field[1][0])+"; name="+field[0]+"; value="+ str(self.getLong(field[0]))+"]"
+                                elif field[1][0] == Message.TYPE_INTEGER:
+                                        data += "[MessageField: type="+hex(field[1][0])+"; name="+field[0]+"; value="+ str(self.getInteger(field[0]))+"]"
+                                elif field[1][0] == Message.TYPE_SHORT:
+                                        data += "[MessageField: type="+hex(field[1][0])+"; name="+field[0]+"; value="+ str(self.getShort(field[0]))+"]"
+                                elif field[1][0] == Message.TYPE_BYTE:
+                                        data += "[MessageField: type="+hex(field[1][0])+"; name="+field[0]+"; value="+ str(self.getByte(field[0]))+"]"
+                                elif field[1][0] == Message.TYPE_BOOLEAN:
+                                        data += "[MessageField: type="+hex(field[1][0])+"; name="+field[0]+"; value="+ str(self.getBoolean(field[0]))+"]"
+                                elif field[1][0] == Message.TYPE_DOUBLE:
+                                        data += "[MessageField: type="+hex(field[1][0])+"; name="+field[0]+"; value="+ str(self.getDouble(field[0]))+"]"
+                                elif field[1][0] == Message.TYPE_STRING:
+                                        data += "[MessageField: type="+hex(field[1][0])+"; name="+field[0]+"; value="+ str(self.getString(field[0]))+"]" 
+                               
+                        except StopIteration: 
+                                break
+
+                        data += "; "
+
+
+                data += "]]"
+                return data

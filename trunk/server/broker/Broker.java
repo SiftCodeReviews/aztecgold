@@ -15,7 +15,6 @@ public class Broker {
 	 */
 	private static Broker instance = null;
 	
-	
 	/**
 	 * The NetworkService used by the Broker
 	 */
@@ -37,10 +36,10 @@ public class Broker {
 	private MessageRouterService routService = null;
 	
 	/**
-	 * TEMPORARY SOLUTION, until the indexservice is working
+	 * The IndexService used by the Broker
 	 */
-	private BrokerCallBack callBackObject;
-
+	private IndexService indexService = null;
+	
 
 	
 	/** 
@@ -48,8 +47,11 @@ public class Broker {
 	 */
 	private Broker() {
 
+		/* IndexService */
+		this.indexService = IndexService.getInstance();
+
 		/* Message Router Service */
-		this.routService = new MessageRouterService();
+		this.routService = new MessageRouterService(this.indexService);
 
 		/* Communication Service */
 		this.comService = new CommunicationService();
@@ -60,9 +62,9 @@ public class Broker {
 		this.proService.setNextService(this.comService);
 
 		/* NetworkService */
-		this.netService = new NetworkService();
+		this.netService = new NetworkService(this.indexService);
 		this.netService.setNextService(this.proService);
-
+		
 	}
 	
 	/**
@@ -84,8 +86,7 @@ public class Broker {
 	 */
 	public void init() {
 	
-		this.netService.createSocket();
-	
+		
 	
 	}
 	
@@ -97,7 +98,7 @@ public class Broker {
 	public void registerCallBack(BrokerCallBack bcb) {
 	
 		bcb.setBroker(this);
-		this.callBackObject = bcb;
+		this.indexService.registerBrokerCallBack(bcb);
 	
 	}
 	
@@ -108,7 +109,8 @@ public class Broker {
 	 */
 	public void send(Message m) {
 	
-		
+		if ( this.routService != null )
+			this.routService.sapUpperLayer(m);
 	
 	}
 	

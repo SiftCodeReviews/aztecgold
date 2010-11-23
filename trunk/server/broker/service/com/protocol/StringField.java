@@ -26,35 +26,30 @@ public class StringField extends MessageField {
 		
 	}
 
-	public byte[] generateBERData() {
+	public int generateBERData(byte[] data, int offset) {
 	
 		byte[] name = this.name.getBytes();
-		int bytesForLength = 0;
+		int length = this.getBERDataSize();
+		int bytesForLength = length - 4 - name.length - this.lengthInByte;
+		int nextIndex = offset;
 		
-		/* ceil( log2(lengthInByte)/8 ) */
-		if ( this.lengthInByte > 127 )
-			bytesForLength = (int)Math.ceil((Math.log(this.lengthInByte)/0.301029995) / 8);
-				
-		int length = 4 + bytesForLength + name.length + this.lengthInByte;
-		byte[] res = new byte[length];
-		int nextIndex = 0;
 		
 		/* 
 		 * 1. TLV for FID 
 		 */
-			res[0]				= MessageField.TYPE_STRING;
-			res[1]				= (byte)(name.length&0x7F);
-			nextIndex			= ByteConversion.copyBytes(name, 0, res, 2, name.length);
+			data[nextIndex]		= MessageField.TYPE_STRING;
+			data[++nextIndex]	= (byte)(name.length&0x7F);
+			nextIndex			= ByteConversion.copyBytes(name, 0, data, ++nextIndex, name.length);
 	
 		/* 
 		 * 2. TLV for Value 
 		 */
-			res[nextIndex]		= this.type;
+			data[nextIndex]		= this.type;
 			
 			/* small length field only 1 Byte, length in byte between 0 - 127 */
 			if ( this.lengthInByte < 128 ) {
 			
-				res[++nextIndex]	= (byte)(this.lengthInByte&0x7F);
+				data[++nextIndex]	= (byte)(this.lengthInByte&0x7F);
 				
 			}
 			
@@ -62,22 +57,18 @@ public class StringField extends MessageField {
 			else {
 				
 				/* store number of bytes for the length field */
-				res[++nextIndex]	= (byte)(bytesForLength&0x7F);
+				data[++nextIndex]	= (byte)((bytesForLength&0x7F) | 0x80);
 				
-				/* insert the length in the subsequent fields */
-				for(int i=1; i <= bytesForLength; i++) {
-				
-					res[++nextIndex] = (byte)((bytesForLength >> ((bytesForLength-i)*8)) & 0xFF);
-				
-				}
+				ByteConversion.longToByte(this.lengthInByte, bytesForLength, data, ++nextIndex);
+				nextIndex += bytesForLength-1;
 				
 			}
 
 			/* copy contents */
 			byte[] bvalue = ((String)this.value).getBytes();
-			ByteConversion.copyBytes(bvalue, 0, res, ++nextIndex, bvalue.length);
+			ByteConversion.copyBytes(bvalue, 0, data, ++nextIndex, bvalue.length);
 	
-		return res;
+		return nextIndex + bvalue.length;
 	
 	}
 	
@@ -129,6 +120,18 @@ public class StringField extends MessageField {
 	
 		/* return next position */
 		return offset;
+	
+	}
+	
+	public int getBERDataSize() {
+	
+		int bytesForLength = 0;
+	
+		/* ceil( log2(lengthInByte)/8 ) */
+		if ( this.lengthInByte > 127 )
+			bytesForLength = (int)Math.ceil((Math.log(this.lengthInByte)/0.301029995) / 8);
+		
+		return 4 + bytesForLength + name.length() + this.lengthInByte;
 	
 	}
 	

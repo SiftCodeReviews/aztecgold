@@ -1,3 +1,4 @@
+import broker.service.index.*;
 import broker.service.com.*;
 import broker.service.com.net.*;
 import broker.*;
@@ -8,42 +9,41 @@ public class BrokerTest {
 
 	public static void main(String[] args) {
 		
-		String mode = "client";
-				
-		if ( args.length > 0 )
-			mode = args[0];
-		
-		if ( mode.equals("server") ) {
-			
-			Broker b = Broker.getInstance();
-			b.init();
-
+		/* hard coded binding of the client, this will be done later automatically */
+		IndexService s = IndexService.getInstance();
+		try {
+			s.registerDistObject( new DistObject(0xFF00FF00, 103884, new InetSocketAddress(InetAddress.getByName((args.length>0)?args[0]:"127.0.0.1"), 2040)) );
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 		
-		else {
 		
-			try {
-			
-				DatagramSocket cs = new DatagramSocket(2038);
-				DatagramPacket dp = new DatagramPacket(new byte[1024], 1024, InetAddress.getByName(args[1]), 2040);
-							
-				byte[] sendM = {/* protocol id */ (byte)0x44,(byte)0x50, /* flags */ (byte)0xFE, /* padding */ (byte)0x0, /* session id */(byte)0x7F,(byte)0xFF,(byte)0xFF,(byte)0xFF, /* request id */(byte)0x0,(byte)0x0,(byte)0x0,(byte)0x1, /* object id */(byte)0x0,(byte)0x0,(byte)0x0,(byte)0x2, /* hash */(byte)0x0,(byte)0x0,(byte)0x0,(byte)0x3, /*Data: name=peter*/(byte)0x21,(byte)0x4,(byte)0x6E,(byte)0x61,(byte)0x6D,(byte)0x65,(byte)0x21,(byte)0x5,(byte)0x50,(byte)0x65,(byte)0x74,(byte)0x65,(byte)0x72, /* data2 */ (byte)0x21,(byte)0x5,(byte)'l',(byte)0x6E,(byte)0x61,(byte)0x6D,(byte)0x65,(byte)0x21,(byte)0x81,(byte)136,(byte)'S',(byte)'c',(byte)'h',(byte)'a',(byte)'e',(byte)'f',(byte)'e',(byte)'r',(byte)'S',(byte)'c',(byte)'h',(byte)'a',(byte)'e',(byte)'f',(byte)'e',(byte)'r',(byte)'S',(byte)'c',(byte)'h',(byte)'a',(byte)'e',(byte)'f',(byte)'e',(byte)'r',(byte)'S',(byte)'c',(byte)'h',(byte)'a',(byte)'e',(byte)'f',(byte)'e',(byte)'r',(byte)'S',(byte)'c',(byte)'h',(byte)'a',(byte)'e',(byte)'f',(byte)'e',(byte)'r',(byte)'S',(byte)'c',(byte)'h',(byte)'a',(byte)'e',(byte)'f',(byte)'e',(byte)'r',(byte)'S',(byte)'c',(byte)'h',(byte)'a',(byte)'e',(byte)'f',(byte)'e',(byte)'r',(byte)'S',(byte)'c',(byte)'h',(byte)'a',(byte)'e',(byte)'f',(byte)'e',(byte)'r',(byte)'S',(byte)'c',(byte)'h',(byte)'a',(byte)'e',(byte)'f',(byte)'e',(byte)'r',(byte)'S',(byte)'c',(byte)'h',(byte)'a',(byte)'e',(byte)'f',(byte)'e',(byte)'r',(byte)'S',(byte)'c',(byte)'h',(byte)'a',(byte)'e',(byte)'f',(byte)'e',(byte)'r',(byte)'S',(byte)'c',(byte)'h',(byte)'a',(byte)'e',(byte)'f',(byte)'e',(byte)'r',(byte)'S',(byte)'c',(byte)'h',(byte)'a',(byte)'e',(byte)'f',(byte)'e',(byte)'r',(byte)'S',(byte)'c',(byte)'h',(byte)'a',(byte)'e',(byte)'f',(byte)'e',(byte)'r',(byte)'S',(byte)'c',(byte)'h',(byte)'a',(byte)'e',(byte)'f',(byte)'e',(byte)'r',(byte)'S',(byte)'c',(byte)'h',(byte)'a',(byte)'e',(byte)'f',(byte)'e',(byte)'r',(byte)'S',(byte)'c',(byte)'h',(byte)'a',(byte)'e',(byte)'f',(byte)'e',(byte)'r',/* data3 double */ (byte)0x21,(byte)0x4,(byte)'d',(byte)'o',(byte)'u',(byte)'b',(byte)0x23,(byte)0x8,(byte)0x40,(byte)0x32,(byte)0x66,(byte)0x66,(byte)0x66,(byte)0x66,(byte)0x66,(byte)0x65, /* byte */(byte)0x21,(byte)0x1,(byte)'x',(byte)0x24,(byte)0x01,(byte)0x80};
-				dp.setData(sendM);
-				cs.send(dp);
-				
-				dp = new DatagramPacket(new byte[1024], 1024);
-				cs.receive(dp);
-				
-				System.out.println("[Client] Response from Server @ " + dp.getAddress() + " ("+dp.getLength()+" Bytes): " + new String(dp.getData()));
-				
-			}
-			catch(Exception e) {
-			
-				e.printStackTrace();
-			
-			}
 		
-		}
+		
+		/* this needs to be done */
+		Broker b = Broker.getInstance();
+		b.registerCallBack(new GameServerTest());
+		b.init();
+		
+		
+		
+		/* demo for sending a message */
+		Message m = new Message(0xFF00FF00,0x11EE11EE,103884);
+		m.setString("mid","moveReq");
+		m.setString("long text","abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789");
+		m.setDouble("double 10.321",10.321);
+		m.setDouble("double -201.2",-201.2);
+		m.setInteger("int -10",-10);
+		m.setInteger("int 2018",2018);
+		m.setLong("long 3123128",3123128);
+		m.setLong("long -3123128",-3123128);
+		m.setByte("byte 123",(byte)123);
+		m.setByte("byte -23",(byte)-23);
+		m.setShort("byte 2012",(short)2012);
+		m.setShort("byte -32000",(short)-32000);
+		m.setBoolean("boolean true",true);
+		m.setBoolean("boolean false",false);
+		b.send(m);
 																																																															
 	}
 
