@@ -5,11 +5,11 @@ from Message import *
 
 class MsgHandler(BrokerCallBack):
     def receive(self, request, response):
-        if request.getString("mid") = "init":
+        if request.getString("mid") == "init":
             self.client.createWorld(request)
-        elif request.getString("mid") = "move":
+        elif request.getString("mid") == "move":
             self.client.moveObject(request)
-        elif request.getString("mid") = "plUpdate";
+        elif request.getString("mid") == "plUpdate";
             pass
         return 0
     def setClient(self, agclient):
