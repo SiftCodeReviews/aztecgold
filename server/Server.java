@@ -16,40 +16,42 @@ import broker.service.index.IndexService;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class Server extends BrokerCallBack {
 
     Broker broker = Broker.getInstance();
-    HashMap hm = new HashMap();
+    HashMap staticMap = new HashMap();
+    HashMap playersMap = new HashMap();
 
     //static objects' positions (never changes)
     double xFort = 11.0;
     double yFort = 11.0;
     double xChest = 10.0;
-
     double yChest = 10.0;
+
     int numTrees = 5;
     {
-        hm.put("xTree1", 1.0);
-        hm.put("yTree1", -1.0);
-        hm.put("xTree2", 2.0);
-        hm.put("yTree2", -2.0);
-        hm.put("xTree3", 3.0);
-        hm.put("yTree3", -3.0);
-        hm.put("xTree4", 4.0);
-        hm.put("yTree4", -4.0);
-        hm.put("xTree5", 5.0);
-        hm.put("yTree5", -5.0);
+        staticMap.put("xTree1", new Double(1.0));
+        staticMap.put("yTree1", new Double(-1.0));
+        staticMap.put("xTree2", new Double(2.0));
+        staticMap.put("yTree2", new Double(-2.0));
+        staticMap.put("xTree3", new Double(3.0));
+        staticMap.put("yTree3", new Double(-3.0));
+        staticMap.put("xTree4", new Double(4.0));
+        staticMap.put("yTree4", new Double(-4.0));
+        staticMap.put("xTree5", new Double(5.0));
+        staticMap.put("yTree5", new Double(-5.0));
     }
 
     int numHuts = 3;
     {
-        hm.put("xHut1", 11.0);
-        hm.put("yHut1", -11.0);
-        hm.put("xHut2", 22.0);
-        hm.put("yHut2", -22.0);
-        hm.put("xHut3", 33.0);
-        hm.put("yHut3", -33.0);
+        staticMap.put("xHut1", new Double(11.0));
+        staticMap.put("yHut1", new Double(-11.0));
+        staticMap.put("xHut2", new Double(12.0));
+        staticMap.put("yHut2", new Double(-12.0));
+        staticMap.put("xHut3", new Double(13.0));
+        staticMap.put("yHut3", new Double(-13.0));
     }
 
     int numPlayers = 0;
@@ -59,13 +61,16 @@ public class Server extends BrokerCallBack {
         //todo later needs to be --> Message msg = new Message(playerID);
         Message msg = new Message(0xFF00FF00,0x11EE11EE,0x195CC);
 
+        //init
+        msg.setString("mid", "init");
+
         //trees
         msg.setInteger("numTrees", numTrees);
 
         for (int i = 1; i <= numTrees; i++) {
 
-            msg.setDouble("xTree" + i, (Double)(hm.get("xTree" + i)));
-            msg.setDouble("yTree" + i, (Double)(hm.get("yTree" + i)));
+            msg.setDouble("xTree" + i, (Double)(staticMap.get("xTree" + i)));
+            msg.setDouble("yTree" + i, (Double)(staticMap.get("yTree" + i)));
         }
 
         //huts
@@ -73,8 +78,8 @@ public class Server extends BrokerCallBack {
 
         for (int i = 1; i <= numHuts; i++) {
 
-            msg.setDouble("xHut" + i, (Double)(hm.get("xHut" + i)));
-            msg.setDouble("yHut" + i, (Double)(hm.get("yHut" + i)));
+            msg.setDouble("xHut" + i, (Double)(staticMap.get("xHut" + i)));
+            msg.setDouble("yHut" + i, (Double)(staticMap.get("yHut" + i)));
         }
 
         //chest and fort
@@ -86,15 +91,16 @@ public class Server extends BrokerCallBack {
         //number of players which are currently logged in
         msg.setInteger("numPlayers", numPlayers);
 
-        for (int i = 1; i <= numPlayers; i++) {
+        Iterator iterator = playersMap.keySet().iterator();
 
-//            msg.setDouble("xPlayer" + i, (Double)(hm.get("xPlayer" + i)));
-//            msg.setDouble("yPlayer" + i, (Double)(hm.get("yPlayer" + i)));
-//            msg.setDouble("hPlayer" + i, (Double)(hm.get("hPlayer" + i)));
-//            msg.setInteger("player" + i, (Integer)(hm.get("player" + i)));
+        while (iterator.hasNext()) {
+            String key = iterator.next().toString();
+
+            if(key.charAt(0) == 'p')
+                msg.setInteger(key, (Integer)playersMap.get(key));
+            else
+                msg.setDouble(key, (Double)playersMap.get(key));
         }
-
-
         return msg;
     }
 
@@ -117,14 +123,31 @@ public class Server extends BrokerCallBack {
 
             System.out.println("Preparing to move the player...");
 
-            //testing....
-//            objectJoined(1);
-//            objectJoined(2);
-//            objectJoined(3);
-//            objectJoined(4);
-//            objectJoined(5);
+//##########################TESTING############################################
 
+//testing..........................static hash map
+//            Iterator iterator = staticMap.keySet().iterator();
+//
+//            while (iterator.hasNext()) {
+//                String key = iterator.next().toString();
+//                String value = staticMap.get(key).toString();
+//
+//                System.out.println(key + "\t\t" + value);
+//            }
+//testing..........................static hash map
+            objectJoined(10);
 
+            playersMap.put("xPlayer10", new Double(2222.22222));
+            playersMap.put("yPlayer10", new Double(2222.22222));
+            playersMap.put("hPlayer10", new Double(2222.22222));
+
+            objectJoined(44);
+            objectLeft(10);
+            objectJoined(55);
+            objectJoined(66);
+            objectJoined(77);
+
+//#############################END OF TESTING#########################################
 
             if(!collision()) {
 
@@ -138,12 +161,12 @@ public class Server extends BrokerCallBack {
 //                response.setBoolean("move", true);
 
                 //testing init; init should be called from objectJoint later on
-                return init(5);
+                //return init(5);
 
 
 //                return response;
 
-                //            return null;
+                return null;
             }
             else {
                 System.out.println("Player CANNOT move, COLLISION!!!");
@@ -156,22 +179,25 @@ public class Server extends BrokerCallBack {
     }
 
     public void objectLeft(int id) {
-        //todo remove an id from hash map...-->  hm.remove("player" + id);
-        //todo then numPlayers --;
+
+        //removing clients that left, note: their coordinates are still stored in the map
+        playersMap.remove("player" + id);
+        numPlayers--;
     }
 
     public void objectJoined(int id) {
 
-        //putting new player in a hash map
-        if(!(hm.containsKey("player" + id))) {
-            hm.put("xPlayer" + id, 1.123456);
-            hm.put("yPlayer" + id, 0.0);
-            hm.put("hPlayer" + id, 0.0);
+        //putting new player in a hash map if player doesn't exist
+        if(!(playersMap.containsKey("xPlayer" + id))) {
+            playersMap.put("xPlayer" + id, 0.1);
+            playersMap.put("yPlayer" + id, 0.1);
+            playersMap.put("hPlayer" + id, 0.1);
         }
 
-        hm.put("player" + id, id);
+        playersMap.put("player" + id, new Integer(id));
         numPlayers ++;
-        init(id);   //send initialized world back to the client
+        broker.send(init(id));   //send initialized world back to the client
+
         //broker.sendBroadcast(playerJoint(id));  //tell everyone about new player
         //broker.send(playerJoined(id));   //for testing only (won't be used)
     }
@@ -182,10 +208,10 @@ public class Server extends BrokerCallBack {
         Message msg = new Message(0xFF00FF00,0x11EE11EE,0x195CC);
 
         msg.setString("mid", "playerJoined");
-        msg.setDouble("xPlayer" + id, (Double)(hm.get("xPlayer" + id)));
-        msg.setDouble("yPlayer" + id, (Double)(hm.get("yPlayer" + id)));
-        msg.setDouble("hPlayer" + id, (Double)(hm.get("hPlayer" + id)));
-        msg.setInteger("player" + id, (Integer)(hm.get("player" + id)));
+        msg.setDouble("xPlayer" + id, (Double)(playersMap.get("xPlayer" + id)));
+        msg.setDouble("yPlayer" + id, (Double)(playersMap.get("yPlayer" + id)));
+        msg.setDouble("hPlayer" + id, (Double)(playersMap.get("hPlayer" + id)));
+        msg.setInteger("player" + id, (Integer)(playersMap.get("player" + id)));
 
         return msg;
     }
