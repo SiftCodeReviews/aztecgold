@@ -137,9 +137,9 @@ public class Server extends BrokerCallBack {
 //testing..........................static hash map
             objectJoined(10);
 
-            playersMap.put("xPlayer10", new Double(2222.22222));
-            playersMap.put("yPlayer10", new Double(2222.22222));
-            playersMap.put("hPlayer10", new Double(2222.22222));
+//            playersMap.put("xPlayer10", new Double(2222.22222));
+//            playersMap.put("yPlayer10", new Double(2222.22222));
+//            playersMap.put("hPlayer10", new Double(2222.22222));
 
             objectJoined(44);
             objectLeft(10);
@@ -180,6 +180,9 @@ public class Server extends BrokerCallBack {
 
     public void objectLeft(int id) {
 
+        //broker.sendBroadcast(playerJoint(id));  //tell everyone that player left
+        broker.send(playerLeft(id));   //for testing only (sendBropadcast() will be used instead)
+
         //removing clients that left, note: their coordinates are still stored in the map
         playersMap.remove("player" + id);
         numPlayers--;
@@ -189,9 +192,9 @@ public class Server extends BrokerCallBack {
 
         //putting new player in a hash map if player doesn't exist
         if(!(playersMap.containsKey("xPlayer" + id))) {
-            playersMap.put("xPlayer" + id, 0.1);
-            playersMap.put("yPlayer" + id, 0.1);
-            playersMap.put("hPlayer" + id, 0.1);
+            playersMap.put("xPlayer" + id, new Double(0.1));
+            playersMap.put("yPlayer" + id, new Double(0.1));
+            playersMap.put("hPlayer" + id, new Double(0.1));
         }
 
         playersMap.put("player" + id, new Integer(id));
@@ -199,7 +202,7 @@ public class Server extends BrokerCallBack {
         broker.send(init(id));   //send initialized world back to the client
 
         //broker.sendBroadcast(playerJoint(id));  //tell everyone about new player
-        //broker.send(playerJoined(id));   //for testing only (won't be used)
+        broker.send(playerJoined(id));   //for testing only (sendBropadcast() will be used instead)
     }
 
     public Message playerJoined(int id) {
@@ -211,6 +214,20 @@ public class Server extends BrokerCallBack {
         msg.setDouble("xPlayer" + id, (Double)(playersMap.get("xPlayer" + id)));
         msg.setDouble("yPlayer" + id, (Double)(playersMap.get("yPlayer" + id)));
         msg.setDouble("hPlayer" + id, (Double)(playersMap.get("hPlayer" + id)));
+        msg.setInteger("player" + id, (Integer)(playersMap.get("player" + id)));
+
+        return msg;
+    }
+
+    public Message playerLeft(int id) {
+
+        //should be in the form (new Message(ID))
+        Message msg = new Message(0xFF00FF00,0x11EE11EE,0x195CC);
+
+        msg.setString("mid", "playerLeft");
+//        msg.setDouble("xPlayer" + id, (Double)(playersMap.get("xPlayer" + id)));
+//        msg.setDouble("yPlayer" + id, (Double)(playersMap.get("yPlayer" + id)));
+//        msg.setDouble("hPlayer" + id, (Double)(playersMap.get("hPlayer" + id)));
         msg.setInteger("player" + id, (Integer)(playersMap.get("player" + id)));
 
         return msg;
