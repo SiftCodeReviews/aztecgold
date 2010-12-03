@@ -5,6 +5,22 @@ package broker.service.com.protocol;
  */
 public class ByteConversion {
 
+	public static int byteToUINT(byte b) {
+	
+		int res = b;
+	
+		if ( b < 0 ) {
+		
+			res = b^0xFF;
+			res++;
+			res = res*(-1);
+			
+		}
+	
+		return res;
+	
+	}
+
 	public static long byteToLong(byte[] b, int offset, int length) {
 	
 		long result = 0;

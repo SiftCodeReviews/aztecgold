@@ -21,21 +21,28 @@ class SocketWorker(threading.Thread):
 
         while 1:
             message, client = self._socket.recvfrom(4096)
-            print "[SocketWorker] Packet received from ", client[0] ,":",client[1],"(server=",self._broker._serverAddress,":",self._broker._serverPort,")"
-            if cmp(self._broker._serverAddress,client[0]) == 0:
-                m = Message()
-                r = Message()
+            #print "[SocketWorker] Packet received from ", client[0] ,":",client[1]
+            
+            m = Message()
+            r = Message()
 
-                # decode bytesequence
-                m.decodeBER(message)
+            # decode bytesequence
+            m.decodeBER(message)
 
-                # prepare response message
-                r._sessionID = m._sessionID
-                r._objectID = m._objectID
-                r._requestID = m._requestID
+            # prepare response message
+            r._sessionID = m._sessionID
+            r._objectID = m._objectID
+            r._requestID = m._requestID
 
-                # callback
-                r = self._broker._callBack.receive(m, r)   
+            # callback message
+            if (m._requestID&0x80000000) == 0:
+                #print "[SocketWorker] callback requestID=", hex(m._requestID)
+                r = self._broker._callBack.receive(m, r)
 
-                if r != 0:
-                    self._broker.send(r)
+            # SessionManager message
+            else:
+                #print "[SocketWorker] sessionManager requestID=", hex(m._requestID)
+                r = self._broker._sessionManager.receive(m, r)
+
+            if r != 0:
+                self._broker.send(r)

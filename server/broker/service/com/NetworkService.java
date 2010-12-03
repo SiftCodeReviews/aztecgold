@@ -1,5 +1,6 @@
 package broker.service.com;
 
+import java.util.*;
 import java.net.*;
 import broker.service.*;
 import broker.service.com.net.*;
@@ -18,17 +19,71 @@ public class NetworkService extends BrokerServiceWrapper {
 	 */
 	private SocketWorker socketworker = null;
 
+	/**
+	 * global IndexService
+	 */
 	private IndexService index = null;
+	
+	/**
+	 * contains a fix socket number to use or -1 in case random selection shall be used
+	 */
+	private int fixSocket = -1;
+	
+	/**
+	 * indicates wether the NetworkService shall accept and register new 
+	 */
+	private boolean accept = false;
+
+	
+
 
 	/**
 	 * Default constructor
 	 */
 	public NetworkService(IndexService index) {
 	
+		this.init(index);
+
+	}
+	
+	/**
+	 * Default constructor
+	 */
+	public NetworkService(IndexService index, int fixSocket, boolean accept) {
+	
+		this.fixSocket	= fixSocket;
+		this.accept		= accept;
+		this.init(index);
+				
+	}
+	
+	/**
+	 * The method performs common initialization functions
+	 */
+	private void init(IndexService index) {
+
+		this.index		= index;
 		this.createSocket();
-		this.index = index;
 	
 	}
+	
+	/**
+	 * The method returns the value of the accept flag, that indicates wether the NetworkService
+	 * accepts and registeres new SocketAddr. This function is used for the registrar application.
+	 */
+	public boolean accepts() {
+	
+		return this.accept;
+	
+	}
+
+	
+	public IndexService getIndexService() {
+	
+		return this.index;
+	
+	}
+
 	
 	public Object sapUpperLayer(Object c) {
 	
@@ -38,13 +93,46 @@ public class NetworkService extends BrokerServiceWrapper {
 
 			ByteSequence s	= (ByteSequence)c;
 			int objectID	= s.getObjectID();
-			DistObject dstO = this.index.lookupDistObject(objectID);
+			int requestID	= s.getRequestID();
+			SocketAddress dst0;
 			
-			if ( dstO != null ) {
+			/* unicast message */
+			if ( requestID != 0x7FFFFFFF ) {
+			
+				dst0 = this.index.lookupSocketAddress(objectID);
+				this.sendToSocket(dst0, s);
+					
+			}
+			
+			/* requestID 0xFFFFFFn indicates a broadcast message */
+			else  {
+			
+				System.out.println("BROADCAST");
+				Enumeration<SocketAddress> socketlist = this.index.getAllSocketAddresses();
+				
+				while(socketlist.hasMoreElements()) {
+				
+					dst0 = socketlist.nextElement();
+					this.sendToSocket(dst0, s);
+				
+				}
+			
+			}
+			
+		}
+	
+		return null;
+	
+	}
+
+
+	private void sendToSocket(SocketAddress dst0, ByteSequence s) {
+	
+		if ( dst0 != null ) {
 				
 				try {
 				
-					DatagramPacket p = new DatagramPacket(s.getSequence(), 0, s.getLength(), dstO.getAddr());
+					DatagramPacket p = new DatagramPacket(s.getSequence(), 0, s.getLength(), dst0);
 					this.socketworker.send(p);
 					
 				}
@@ -55,13 +143,14 @@ public class NetworkService extends BrokerServiceWrapper {
 				}
 				
 			}
-		
-		}
-	
-		return null;
+			
+			else {
+			
+				throw new RuntimeException(String.format("[NetworkService] Unknown Destination [objectID=0x%X]", s.getObjectID()));
+			
+			}
 	
 	}
-
 
 	
 	/**
@@ -83,8 +172,11 @@ public class NetworkService extends BrokerServiceWrapper {
 			
 			}
 			
-			//port = (int)(1025 + Math.random() * 64512);
-			port = 2038;
+			if ( fixSocket < 0 )
+				port = (int)(1025 + Math.random() * 64512);
+				//port = 2038;
+			else
+				port = fixSocket;
 		
 			/* creating a default socket */
 			try {
@@ -94,6 +186,7 @@ public class NetworkService extends BrokerServiceWrapper {
 				
 			}
 			catch(Exception e) {
+				System.out.println(port);
 				e.printStackTrace();
 			}
 			

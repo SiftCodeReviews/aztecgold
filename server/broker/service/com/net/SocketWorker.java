@@ -73,7 +73,7 @@ public class SocketWorker implements Runnable {
 	public synchronized boolean send(DatagramPacket p) {
 	
 		try {
-			this.socket.send(p);	
+			this.socket.send(p);
 		}
 		catch(Exception e) {
 			e.printStackTrace();

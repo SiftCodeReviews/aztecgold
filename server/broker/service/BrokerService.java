@@ -35,8 +35,21 @@ public interface BrokerService {
 	 */
 	public Object sapLowerLayer(Object c);
 	
+	/**
+	 * The method return the next/upper service if set.
+	 * @return upper service
+	 */
 	public BrokerService getNextService();
 	
+	/**
+	 * The method return the previous/lower service if set.
+	 * @return lower service
+	 */
 	public BrokerService getPreviousService();
+	
+	/**
+	 * This method will be periodically invoked in case the BrokerService object is registered at a CrownService.
+	 */
+	public void crownCallBack();
 
 }

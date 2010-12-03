@@ -30,7 +30,7 @@ public class StringField extends MessageField {
 	
 		byte[] name = this.name.getBytes();
 		int length = this.getBERDataSize();
-		int bytesForLength = length - 4 - name.length - this.lengthInByte;
+		int bytesForLength = length - (4 + name.length + this.lengthInByte);
 		int nextIndex = offset;
 		
 		
@@ -127,9 +127,9 @@ public class StringField extends MessageField {
 	
 		int bytesForLength = 0;
 	
-		/* ceil( log2(lengthInByte)/8 ) */
+		/* ceil( log(lengthInByte)/log(256) ) */
 		if ( this.lengthInByte > 127 )
-			bytesForLength = (int)Math.ceil((Math.log(this.lengthInByte)/0.301029995) / 8);
+			bytesForLength = (int)Math.ceil((Math.log(this.lengthInByte)/Math.log(256)));
 		
 		return 4 + bytesForLength + name.length() + this.lengthInByte;
 	
