@@ -6,7 +6,7 @@ import java.net.*;
 import java.security.*;
 import broker.service.*;
 import broker.service.index.*;
-import broker.service.crown.*;
+import broker.service.cron.*;
 import broker.service.com.protocol.*;
 import broker.service.com.session.*;
 import broker.service.user.*;
@@ -56,7 +56,7 @@ public class SessionService extends BrokerServiceWrapper {
 		this.initSessionList= new Hashtable<Integer,SessionObject>();
 		this.userService	= UserService.getInstance();
 
-		CrownService c		= CrownService.getInstance();
+		CronService c		= CronService.getInstance();
 		c.registerService(this);
 		
 	}
@@ -296,7 +296,7 @@ public class SessionService extends BrokerServiceWrapper {
 
 
 	
-	public void crownCallBack() {
+	public void cronCallBack() {
 	
 		Enumeration<SessionObject> eso = this.initSessionList.elements();
 		SessionObject tso;

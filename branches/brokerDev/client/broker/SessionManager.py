@@ -90,6 +90,8 @@ class SessionManager(threading.Thread):
                 self._broker._objectID = m.getInteger("objectid")
                 self._ticket = m.getString("ticket")
 
+                print "[SessionManager] Authenticated with ObjectID=", self._broker._objectID
+
                 #print "server ip: ", self._broker._serverAddress
                 #print "server port: ", self._broker._serverPort
 
@@ -108,7 +110,7 @@ class SessionManager(threading.Thread):
             if self.validateTicket(m) == True:
                 self._broker._state = "online"
                 self._initalized = True
-                print "[SessionManager] Server successfull authenticated!"
+                #print "[SessionManager] Server successfull authenticated!"
             else:
                 raise RuntimeError("[SessionManager] receive() - Server authentication failed")
 

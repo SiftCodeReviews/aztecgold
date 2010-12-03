@@ -7,22 +7,8 @@ public class GameServerTest extends BrokerCallBack {
 	public Message receive(Message request, Message response) {
 	
 		System.out.println("[GameServerTest] receive() - Message with "+request.getFieldNumber()+" field(s) received");
-		System.out.println(request);
-		
-		try { 
-		
-			response.setString("subject", "Re: " + request.getString("subject"));
-			response.setString("message", "Hello client, I'm happy to welcome you to the world.");
-			response.setDouble("size", 10293.123);
-				
-		}
-		catch(Exception e) {
 
-			response = null;
-		
-		}
-		
-		return response;
+		return null;
 	
 	}
 	

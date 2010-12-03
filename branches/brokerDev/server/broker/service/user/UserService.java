@@ -90,7 +90,7 @@ public class UserService extends BrokerServiceWrapper {
 		}
 
 		if ( result == null )
-			System.out.println("[UserService] sapLowerLayer() - Authenticated FAILED (name="+username+")");		
+			System.out.println("[UserService] sapLowerLayer() - Authentication FAILED (name="+username+")");		
 	
 		return result;
 	

@@ -1,19 +1,19 @@
-package broker.service.crown;
+package broker.service.cron;
 
 import broker.service.*;
 import java.util.*;
 
 /**
- * The CrownService is a simple service providing periodic callbacks for periodic 
+ * The CronService is a simple service providing periodic callbacks for periodic 
  * operations in other services. It uses a global time interval that is not exactly
  * timed, this means callbacks can occur earlier or later.
  */
-public class CrownService extends BrokerServiceWrapper implements Runnable {
+public class CronService extends BrokerServiceWrapper implements Runnable {
 
 	/**
 	 * singleton instance for this class
 	 */
-	private static CrownService instance = null;
+	private static CronService instance = null;
 	
 	/**
 	 * list of BrokerServices that will be periodically invoked
@@ -26,7 +26,7 @@ public class CrownService extends BrokerServiceWrapper implements Runnable {
 	private long interval = 500;
 	
 	
-	private CrownService() {
+	private CronService() {
 	
 		this.callbacklist = new ArrayList<BrokerService>();
 	
@@ -35,12 +35,12 @@ public class CrownService extends BrokerServiceWrapper implements Runnable {
 	
 	}
 	
-	public static CrownService getInstance() {
+	public static CronService getInstance() {
 	
-		if ( CrownService.instance == null )
-			CrownService.instance = new CrownService();
+		if ( CronService.instance == null )
+			CronService.instance = new CronService();
 			
-		return CrownService.instance;
+		return CronService.instance;
 	
 	}
 	
@@ -62,7 +62,7 @@ public class CrownService extends BrokerServiceWrapper implements Runnable {
 				
 					for(int i=0; i < this.callbacklist.size(); i++) {
 					
-						this.callbacklist.get(i).crownCallBack();
+						this.callbacklist.get(i).cronCallBack();
 					
 					}
 				
