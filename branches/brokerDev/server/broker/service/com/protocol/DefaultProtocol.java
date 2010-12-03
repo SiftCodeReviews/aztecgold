@@ -1,5 +1,6 @@
 package broker.service.com.protocol;
 
+import broker.service.com.net.*;
 import java.net.*;
 import java.util.*;
 
@@ -25,9 +26,18 @@ public class DefaultProtocol extends Protocol {
 	
 	}
 	
-	public Message assemble(byte[] mstream, int length) throws ProtocolException {
+	public Message assemble(ByteSequence p) throws ProtocolException {
 	
 		Message m = null;
+		byte[] mstream	= p.getSequence();
+		int length		= p.getLength();
+		
+		/*
+		for(int i=0; i < length; i++)
+			System.out.print(String.format("0x%X ", mstream[i]));
+				
+			System.out.println();
+		*/
 		
 		/* protocol id correct */
 		if ( mstream[0] == (this.protocolID>>8) && mstream[1] == (this.protocolID&0xFF) ) {
@@ -59,7 +69,7 @@ public class DefaultProtocol extends Protocol {
 			//System.out.println("[DefaultProtocol] hash length = " + hashLength);
 			
 			/* determine if it is an error message */
-			error			= ( (mstream[2]&0x02) != 0 ) ? true : false;
+			error			= ( (mstream[2]&0x01) != 0 ) ? true : false;
 			
 			headerLength += objectIDLength + sessionIDLength + hashLength + requestIDLength;
 			
@@ -76,15 +86,21 @@ public class DefaultProtocol extends Protocol {
 				
 			}
 			
-			//System.out.println(String.format("[DefaultProtocol] sessionID = 0x%X", sessionID));
+//			System.out.println(String.format("[DefaultProtocol] sessionID = 0x%X", sessionID));
 //			System.out.println(String.format("[DefaultProtocol] requestID = 0x%X", requestID));
 //			System.out.println(String.format("[DefaultProtocol] objectID = 0x%X", objectID));
 //			System.out.println(String.format("[DefaultProtocol] hash = 0x%X", hash));
 //			System.out.println("[DefaultProtocol] Header length = " + headerLength);
 			
 			/* create message and insert parsed data */
+			if ( (objectID&0x80000000) != 0 && p.getObjectID() != -1 )
+				objectID = p.getObjectID();
+			
 			m = new Message(sessionID,requestID,objectID);
 			m.setData( MessageField.parseBERData(mstream, headerLength, length) );
+			
+			if ( error )
+				m.setError();
 			
 		}
 		
@@ -121,6 +137,7 @@ public class DefaultProtocol extends Protocol {
 		flags	= (byte)(flags | ((REQUEST_ID_LENGTH-1)<<4));
 		flags	= (byte)(flags | ((OBJECT_ID_LENGTH-1)<<2));
 		flags	= (byte)(flags | ((HASH_USED?1:0)<<1));
+		flags	= (byte)(flags | (m.getError()?1:0));
 		mb[2]	= flags;
 				
 		ByteConversion.longToByte(m.getSessionID(), SESSION_ID_LENGTH, mb, offset);
@@ -136,6 +153,7 @@ public class DefaultProtocol extends Protocol {
 		mde = md.elements();
 		while(mde.hasMoreElements())
 			offset = (mde.nextElement()).generateBERData(mb, offset);
+		
 		/*
 		for(int i=0; i < totalSize; i++)
 			System.out.print(String.format("0x%X ", mb[i]));

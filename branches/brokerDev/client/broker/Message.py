@@ -148,6 +148,21 @@ class Message:
                         
                 return integer
 
+        def getError(self):
+                if self._error != 0:
+                        return True
+                else:
+                        return False
+
+        def getSessionID(self):
+                return self._sessionID
+
+        def getObjectID(self):
+                return self._objectID
+
+        def getRequestID(self):
+                return self._requesttID
+
         """
         The method returns the number of data fields stored in the message
         """
@@ -399,7 +414,7 @@ class Message:
                                 if field[1][0] == Message.TYPE_STRING and len(field[1][1]) > 127:
                                         length = len(field[1][1])
                                         lengthbyte = int(math.ceil(math.log(length, 256)))
-                                        data += chr(lengthbyte)
+                                        data += chr(0x80 | lengthbyte)
                                         data += self._IntegerToString(length, lengthbyte)
                                 else:
                                         data += chr(len(field[1][1]))

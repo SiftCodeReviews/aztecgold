@@ -15,6 +15,10 @@ public class Message {
 	
 	private Hashtable<String,MessageField> data;
 	
+	private boolean error = false;
+	
+	
+	
 	
 	public Message() {
 	
@@ -31,6 +35,15 @@ public class Message {
 		this.requestID	= m.requestID;
 		
 	}
+	
+	public Message(int objectID) {
+	
+		this();
+
+		this.objectID = objectID;
+	
+	}
+
 	
 	public Message(int sessionID, int requestID, int objectID) {
 	
@@ -60,6 +73,37 @@ public class Message {
 	
 	}
 	
+	public void setRequestID(int r) {
+	
+		this.requestID = r;
+	
+	}
+
+	public void setSessionID(int r) {
+	
+		this.sessionID = r;
+	
+	}
+	
+	public void setObjectID(int r) {
+	
+		this.sessionID = r;
+	
+	}
+
+
+
+	public void setError() {
+	
+		this.error = true;
+	
+	}
+	
+	public boolean getError() {
+	
+		return this.error;
+	
+	}
 	
 	
 	public void setString(String name, String value) {
@@ -116,9 +160,9 @@ public class Message {
 	
 		MessageField s = this.data.get(name);
 		
-		if ( s == null || s.getType() == MessageField.TYPE_STRING ) {
+		if ( s != null && s.getType() == MessageField.TYPE_STRING ) {
 		
-			return (String)s.getValue();
+				return (String)s.getValue();
 		
 		}
 		
@@ -130,7 +174,7 @@ public class Message {
 	
 		MessageField s = this.data.get(name);
 		
-		if ( s == null || s.getType() == MessageField.TYPE_LONG ) {
+		if ( s != null && s.getType() == MessageField.TYPE_LONG ) {
 			
 			return ((Long)s.getValue()).longValue();
 		
@@ -144,7 +188,7 @@ public class Message {
 	
 		MessageField s = this.data.get(name);
 		
-		if ( s == null || s.getType() == MessageField.TYPE_INTEGER ) {
+		if ( s != null && s.getType() == MessageField.TYPE_INTEGER ) {
 			
 			return ((Integer)s.getValue()).intValue();
 		
@@ -158,7 +202,7 @@ public class Message {
 	
 		MessageField s = this.data.get(name);
 		
-		if ( s == null || s.getType() == MessageField.TYPE_SHORT ) {
+		if ( s != null && s.getType() == MessageField.TYPE_SHORT ) {
 			
 			return ((Short)s.getValue()).shortValue();
 		
@@ -172,7 +216,7 @@ public class Message {
 	
 		MessageField s = this.data.get(name);
 		
-		if ( s == null || s.getType() == MessageField.TYPE_BYTE ) {
+		if ( s != null && s.getType() == MessageField.TYPE_BYTE ) {
 			
 			return ((Byte)s.getValue()).byteValue();
 		
@@ -186,7 +230,7 @@ public class Message {
 	
 		MessageField s = this.data.get(name);
 		
-		if ( s == null || s.getType() == MessageField.TYPE_BOOLEAN ) {
+		if ( s != null && s.getType() == MessageField.TYPE_BOOLEAN ) {
 			
 			return ((Boolean)s.getValue()).booleanValue();
 		
@@ -200,7 +244,7 @@ public class Message {
 	
 		MessageField s = this.data.get(name);
 		
-		if ( s == null || s.getType() == MessageField.TYPE_DOUBLE ) {
+		if ( s != null && s.getType() == MessageField.TYPE_DOUBLE ) {
 			
 			return ((Double)s.getValue()).doubleValue();
 		
