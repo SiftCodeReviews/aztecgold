@@ -48,8 +48,8 @@ public interface BrokerService {
 	public BrokerService getPreviousService();
 	
 	/**
-	 * This method will be periodically invoked in case the BrokerService object is registered at a CrownService.
+	 * This method will be periodically invoked in case the BrokerService object is registered at a CronService.
 	 */
-	public void crownCallBack();
+	public void cronCallBack();
 
 }

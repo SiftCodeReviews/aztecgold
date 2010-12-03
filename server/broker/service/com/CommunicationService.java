@@ -3,7 +3,7 @@ package broker.service.com;
 import broker.service.com.session.*;
 import broker.service.com.protocol.*;
 import broker.service.*;
-import broker.service.crown.*;
+import broker.service.cron.*;
 import broker.service.index.*;
 import broker.service.user.*;
 import broker.object.*;
@@ -76,7 +76,7 @@ public class CommunicationService extends BrokerServiceWrapper {
 	
 		this.index = index;
 		
-		CrownService c = CrownService.getInstance();
+		CronService c = CronService.getInstance();
 		c.registerService(this);
 	
 	}
@@ -311,7 +311,7 @@ public class CommunicationService extends BrokerServiceWrapper {
 	}
 	
 	
-	public void crownCallBack() { 
+	public void cronCallBack() { 
 			
 		/* if registrar is not responding to keep alives it is assumed that it is offline */
 		if ( this.keepAliveComp > 1 ) {
@@ -378,7 +378,7 @@ public class CommunicationService extends BrokerServiceWrapper {
 	
 	private void setRegistrarOffline() {
 				
-		System.out.println("[CommunicationService] setRegistrarOffline	() - Registrar not reachable.");
+		System.out.println("[CommunicationService] setRegistrarOffline() - Registrar not reachable.");
 		this.registrarOnline = false;
 	
 	}

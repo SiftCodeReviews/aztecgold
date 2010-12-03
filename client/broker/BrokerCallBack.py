@@ -24,7 +24,7 @@ class BrokerCallBack:
 
         # reading a prepared message from the server
         print "[BrokerCallBack] receive() - Message with ", request.getFieldNumber() , " field(s) received"
-        print request.toString()
+        #print request.toString()
 
         #just a little test, on every incoming message the client sends out this message
         response.setString("mid","moveReq")
