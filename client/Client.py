@@ -96,47 +96,47 @@ class AGClient(ShowBase):
     def createWorld(self, m):
         self.numPlayers = message.getInteger("numPlayers")
         for i in range(numPlayers):
-            tmpstr = "player" + str(numPlayers)
+            tmpstr = "player" + str(i)
             self.createObject(message.getInteger(tmpstr + "ID"),
                          "player",
-                         m.getDouble(tmpstr + "x"),
-                         m.getDouble(tmpstr + "y"),
-                         m.getDouble(tmpstr + "h"))
+                         m.getDouble("x" + tmpstr),
+                         m.getDouble("y" + tmpstr),
+                         m.getDouble("h" + tmpstr))
         self.numTrees = message.getInteger("numTrees")
         for i in range(numTrees):
-            tmpstr = "tree" + str(numTrees)
-            self.createObject(message.getInteger(tmpstr + "ID"),
+            tmpstr = "tree" + str(i)
+            self.createObject(message.getInteger("ID" + tmpstr),
                          "tree",
-                         m.getDouble(tmpstr + "x"),
-                         m.getDouble(tmpstr + "y"),
-                         m.getDouble(tmpstr + "h"))
+                         m.getDouble("x" + tmpstr),
+                         m.getDouble("y" + tmpstr),
+                         m.getDouble("h" + tmpstr))
         self.numHuts = message.getInteger("numHuts")
         for i in range(numHuts):
-            tmpstr = "hut" + str(numHuts)
+            tmpstr = "hut" + str(i)
             self.createObject(message.getInteger(tmpstr + "ID"),
                          "hut",
-                         m.getDouble(tmpstr + "x"),
-                         m.getDouble(tmpstr + "y"),
-                         m.getDouble(tmpstr + "h"))
+                         m.getDouble("x" + tmpstr),
+                         m.getDouble("y" + tmpstr),
+                         m.getDouble("h" + tmpstr))
         self.numAztecs = message.getInteger("numAztecs")
         for i in range(numAztecs):
-            tmpstr = "aztec" + str(numAztecs)
+            tmpstr = "aztec" + str(i)
             self.createObject(message.getInteger(tmpstr + "ID"),
                          "aztec",
-                         m.getDouble(tmpstr + "x"),
-                         m.getDouble(tmpstr + "y"),
-                         m.getDouble(tmpstr + "h"))
+                         m.getDouble("x" + tmpstr),
+                         m.getDouble("y" + tmpstr),
+                         m.getDouble("h" + tmpstr))
         self.numCoins = message.getInteger("numCoins")
         for i in range(numCoins):
-            tmpstr = "coin" + str(numCoins)
+            tmpstr = "coin" + str(i)
             self.createObject(message.getInteger(tmpstr + "ID"),
                          "coin",
-                         m.getDouble(tmpstr + "x"),
-                         m.getDouble(tmpstr + "y"),
-                         m.getDouble(tmpstr + "h"))
+                         m.getDouble("x" + tmpstr),
+                         m.getDouble("y" + tmpstr),
+                         m.getDouble("h" + tmpstr))
 
-        self.createObject(0, "chest", m.getDouble("chestx"), m.getDouble("chesty"), m.getDouble("chesth"))
-        self.createObject(0, "fort", m.getDouble("fortx"), m.getDouble("forty"), m.getDouble("forth"))
+        self.createObject(0, "chest", m.getDouble("xchest"), m.getDouble("ychest"), m.getDouble("chesth"))
+        self.createObject(0, "fort", m.getDouble("xfort"), m.getDouble("yfort"), m.getDouble("forth"))
 
 app = AGClient()
 app.run()
