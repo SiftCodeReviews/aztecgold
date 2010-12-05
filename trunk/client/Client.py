@@ -9,7 +9,7 @@ class MsgHandler(BrokerCallBack):
             self.client.createWorld(request)
         elif request.getString("mid") == "move":
             self.client.moveObject(request)
-        elif request.getString("mid") == "plUpdate";
+        elif request.getString("mid") == "plUpdate":
             pass
         return 0
     def setClient(self, agclient):
@@ -28,11 +28,7 @@ class AGClient(ShowBase):
         b.registerCallBack(MH)
         b.init()
         
-        self.playerDic = {}
-        self.treeDic = {}
-        self.hutDic = {}
-        self.aztecDic = {}
-        self.coinDic = {}
+        self.objectDic = {}
         #init-login
 
         ################################333333
@@ -52,13 +48,13 @@ class AGClient(ShowBase):
         
         if o.oType == "coin":
             o.model = self.loader.loadModel("models/coin")
-            self.coinDic[key] = o
+            self.objectDic[key] = o
         elif o.oType == "player":
             o.model = self.loader.loadModel("model/panda-model")
-            self.playerDic[key] = o
+            self.objectDic[key] = o
         elif o.oType == "tree":
             o.model = self.loader.loadModel("model/coin")
-            self.treeDic[key] = o
+            self.objectDic[key] = o
         elif o.oType == "chest":
             o.model = self.loader.loadModel("model/coin")
             self.chestDic[key] = o
@@ -79,14 +75,14 @@ class AGClient(ShowBase):
     def movePlayerTask(self, task):
         #define stuff here
         pass
-    def moveObject(self, m)
+    def moveObject(self, m):
         if m.getString("objType") == "player":
             o = playerDic[m.getInteger("ID")]
         elif m.getString("objType") == "coin":
             o = coinDic[m.getInteger("ID")]
         elif m.getString("objType") == "aztec":
             o = aztecDic[m.getInteger("ID")]
-        else
+        else:
             return
         o.x = m.getDouble("x")
         o.y = m.getDouble("y")
