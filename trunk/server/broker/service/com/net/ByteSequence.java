@@ -8,7 +8,9 @@ public class ByteSequence {
 	
 	private int length;
 	
-	private Message m = null;
+	private int objectID = -1;
+	
+	private int requestID = -1;
 	
 	public ByteSequence(byte[] sequence, int length) {
 	
@@ -25,15 +27,27 @@ public class ByteSequence {
 		return this.sequence;
 	}
 	
-	public void setMessage(Message m) {
+	public void setObjectID(int objectID) {
 	
-		this.m = m;
+		this.objectID = objectID;
 	
 	}
 	
 	public int getObjectID() {
 	
-		return this.m.getObjectID();
+		return this.objectID;
+	
+	}
+	
+	public void setRequestID(int requestID) {
+	
+		this.requestID = requestID;
+	
+	}
+	
+	public int getRequestID() {
+	
+		return this.requestID;
 	
 	}
 			

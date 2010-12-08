@@ -35,8 +35,11 @@ public class ProtocolService extends BrokerServiceWrapper {
 		
 		if ( p != null && mb != null ) {
 		
+			Message m = (Message)c;
 			ByteSequence bs = new ByteSequence(mb, mb.length);
-			bs.setMessage((Message)c);
+			bs.setObjectID(m.getObjectID());
+			bs.setRequestID(m.getRequestID());
+			
 			p.sapUpperLayer(bs);
 			
 		}
@@ -52,15 +55,24 @@ public class ProtocolService extends BrokerServiceWrapper {
 		Object r = null;
 		
 		try {
-		
-			ByteSequence p = (ByteSequence)c;
-		
+				
 			/* use Protocol object to assemble the message */
-			Message m = this.usedProtocol.assemble(p.getSequence(), p.getLength());
+			Message m = this.usedProtocol.assemble((ByteSequence)c);
 		
 			/* pass to upper layer if existing */
-			if ( this.nextService != null )
-				r = this.nextService.sapLowerLayer(m);
+			if ( this.nextService != null ) {
+
+				Message m2		= (Message)this.nextService.sapLowerLayer(m);
+				
+				/* disassemble response message if one gets returned */
+				if ( m2 != null ) {
+				
+					byte[] mb		= this.usedProtocol.disassemble(m2);
+					r				= new ByteSequence(mb, mb.length);
+					
+				}
+				
+			}
 		
 		}
 		catch(ProtocolException e) {		
