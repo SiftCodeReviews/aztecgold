@@ -54,7 +54,7 @@ public class Broker {
 		this.routService = new MessageRouterService(this.indexService);
 
 		/* Communication Service */
-		this.comService = new CommunicationService();
+		this.comService = new CommunicationService(this.indexService);
 		this.comService.setNextService(this.routService);
 
 		/* Protocol Service */
@@ -86,8 +86,10 @@ public class Broker {
 	 */
 	public void init() {
 	
+		/* send ObjectHello to registrar, the rest of the communication will be handled in the CommunicationService */
+		Message m = new Message(0x80000000,0x80000000,0x80000000);
+		this.send(m);
 		
-	
 	}
 	
 	/**
@@ -122,6 +124,23 @@ public class Broker {
 	 */	
 	public void sendBroadcast(Message m) {
 	
+		if ( this.routService != null ) {
+		
+			m.setRequestID(0x7FFFFFFF);
+			this.routService.sapUpperLayer(m);
+			
+		}
+	
+	}
+	
+	/**
+	 * The method sets the authentication data needed to authenticate against the registrar.
+	 * @param username name of the user
+	 * @param password user password
+	 */
+	public void setAuthenticationData(String username, String password) {
+	
+		this.indexService.setAuthenticationData(username,password);
 	
 	}
 	
