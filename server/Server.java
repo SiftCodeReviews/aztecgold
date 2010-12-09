@@ -10,19 +10,22 @@
 import broker.Broker;
 import broker.object.*;
 import broker.service.com.protocol.*;
-import broker.service.index.DistObject;
-import broker.service.index.IndexService;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Iterator;
 
 public class Server extends BrokerCallBack {
 
     Broker broker = Broker.getInstance();
+
     HashMap staticMap = new HashMap();
-    HashMap playersMap = new HashMap();
+
+    //HashMap playersMap = new HashMap();
+    //HashMap aztecsMap = new HashMap();
+
+    HashMap<Integer, HashMap> db;
+
+    int numPlayers = 0;
 
     //static objects' positions (never changes)
     double xFort = 11.0;
@@ -54,12 +57,21 @@ public class Server extends BrokerCallBack {
         staticMap.put("yHut3", new Double(-13.0));
     }
 
-    int numPlayers = 0;
+//    int numAztecs = 15;
+//    {
+//        for (int i = 1; i <= numAztecs; i++) {
+//            aztecsMap.put("aztec" + numAztecs, -1 * numAztecs);
+//        }
+//    }
+
+    public Server() {
+
+        db = new HashMap<Integer, HashMap>();
+    }
 
     public Message init(int playerID) {
 
-        //todo later needs to be --> Message msg = new Message(playerID);
-        Message msg = new Message(0xFF00FF00,0x11EE11EE,0x195CC);
+        Message msg = new Message(playerID);
 
         //init
         msg.setString("mid", "init");
@@ -88,19 +100,33 @@ public class Server extends BrokerCallBack {
         msg.setDouble("xChest", xChest);
         msg.setDouble("yChest", yChest);
 
-        //number of players which are currently logged in
+        //aztects
+
+
+        //number of players which are currently active
         msg.setInteger("numPlayers", numPlayers);
 
-        Iterator iterator = playersMap.keySet().iterator();
 
-        while (iterator.hasNext()) {
-            String key = iterator.next().toString();
 
-            if(key.charAt(0) == 'p')
-                msg.setInteger(key, (Integer)playersMap.get(key));
-            else
-                msg.setDouble(key, (Double)playersMap.get(key));
-        }
+//
+//
+////todo ........ change, add aztecs
+//        Iterator iterator = playersMap.keySet().iterator();
+//
+//        while (iterator.hasNext()) {
+//            String key = iterator.next().toString();
+//
+//            if(key.charAt(0) == 'p')
+//                msg.setInteger(key, (Integer)playersMap.get(key));
+//            else
+//                msg.setDouble(key, (Double)playersMap.get(key));
+//        }
+////todo....
+
+
+
+
+
         return msg;
     }
 
@@ -109,45 +135,22 @@ public class Server extends BrokerCallBack {
         return false;
     }
 
+
     public Message receive(Message request, Message response) {
 
         System.out.println("------------------------------------------");
-        System.out.println("Number of fields = " + request.getFieldNumber());
-        System.out.println("SessionID = "        + request.getSessionID());
-        System.out.println("RequestID = "        + request.getRequestID());
-        System.out.println("ObjectID = "         + request.getObjectID());
-        System.out.println("Request = "          + request);
+        System.out.println("[Server] receive()");
+        System.out.println("----> Number of fields = " + request.getFieldNumber());
+        System.out.println("----> SessionID = "        + request.getSessionID());
+        System.out.println("----> RequestID = "        + request.getRequestID());
+        System.out.println("----> ObjectID = "         + request.getObjectID());
+        System.out.println("----> Request msg = "      + request);
         System.out.println("------------------------------------------");
 
         if(request.getString("mid").equals("moveReq")) {
 
-            System.out.println("Preparing to move the player...");
-
-//##########################TESTING############################################
-
-//testing..........................static hash map
-//            Iterator iterator = staticMap.keySet().iterator();
-//
-//            while (iterator.hasNext()) {
-//                String key = iterator.next().toString();
-//                String value = staticMap.get(key).toString();
-//
-//                System.out.println(key + "\t\t" + value);
-//            }
-//testing..........................static hash map
-            objectJoined(10);
-
-//            playersMap.put("xPlayer10", new Double(2222.22222));
-//            playersMap.put("yPlayer10", new Double(2222.22222));
-//            playersMap.put("hPlayer10", new Double(2222.22222));
-
-            objectJoined(44);
-            objectLeft(10);
-            objectJoined(55);
-            objectJoined(66);
-            objectJoined(77);
-
-//#############################END OF TESTING#########################################
+            System.out.println("[Server] Moving player " + request.getObjectID() +
+                    " to h = " + request.getDouble("h"));
 
             if(!collision()) {
 
@@ -169,7 +172,7 @@ public class Server extends BrokerCallBack {
                 return null;
             }
             else {
-                System.out.println("Player CANNOT move, COLLISION!!!");
+                System.out.println("[Server] Player with id " + request.getObjectID() + " CAN NOT longer move...");
                 //todo notifyAll() about the change....NO move!!!
                 return null;
             }
@@ -178,86 +181,223 @@ public class Server extends BrokerCallBack {
             return null;
     }
 
-    public void objectLeft(int id) {
-
-        //broker.sendBroadcast(playerJoint(id));  //tell everyone that player left
-        broker.send(playerLeft(id));   //for testing only (sendBropadcast() will be used instead)
-
-        //removing clients that left, note: their coordinates are still stored in the map
-        playersMap.remove("player" + id);
-        numPlayers--;
-    }
-
     public void objectJoined(int id) {
 
-        //putting new player in a hash map if player doesn't exist
-        if(!(playersMap.containsKey("xPlayer" + id))) {
-            playersMap.put("xPlayer" + id, new Double(0.1));
-            playersMap.put("yPlayer" + id, new Double(0.1));
-            playersMap.put("hPlayer" + id, new Double(0.1));
+        HashMap players = new HashMap();
+        System.out.println("\n\n[Server] objectJoined() ----> id = " + id);
+        numPlayers++;
+
+        //putting new player in a hash map, initializing its position
+        if(!(db.containsKey(id))) {
+            System.out.println("[Server] Player with id " + id + " is a new player, registering in DB ...");
+            players.put("id", id);
+            players.put("x", 0.1);
+            players.put("y", 0.1);
+            players.put("h", 0.1);
+            db.put(id, players);
+        }
+        else {
+            (db.get(id)).put("id", id);
+            System.out.println("[Server] Player with id " + id + " is already in DB, retrieving info...");
+            System.out.println("[Server] Last saved coordinates are: " + db.get(id));
         }
 
-        playersMap.put("player" + id, new Integer(id));
-        numPlayers ++;
-        broker.send(init(id));   //send initialized world back to the client
+        testMessage(init(id));
+        testMessage(playerJoined(id));
+        testHashMap("");
 
-        //broker.sendBroadcast(playerJoint(id));  //tell everyone about new player
-        broker.send(playerJoined(id));   //for testing only (sendBropadcast() will be used instead)
+        broker.send(init(id));   //send initialized world back to the client
+//        //todo doesn't work yet wait for Peter --->
+        broker.sendBroadcast(playerJoined(id));  //broadcast to everyone about new player
+//        broker.send(playerJoined(id)); //for testing only (sendBroadcast() will be used instead...)
+
+
+//-------------------------------------------------------------
+
+//        System.out.println("[Server] objectJoined() ----> id = " + id);
+//        numPlayers++;
+//
+//        //putting new player in a hash map if player is new
+//        if(!(playersMap.containsValue(id))) {
+//            System.out.println("[Server] Player with id " + id + " is a new player, registering in DB...");
+//
+//            playersMap.put("player" + numPlayers, id);
+//            playersMap.put("xPlayer" + numPlayers, new Double(0.1));
+//            playersMap.put("yPlayer" + numPlayers, new Double(0.1));
+//            playersMap.put("hPlayer" + numPlayers, new Double(0.1));
+//
+//            testHashMap("aztec");
+//        }
+//        else {
+//
+//        }
+//
+////        if(!(playersMap.containsKey("xPlayer" + id))) {
+////            playersMap.put("xPlayer" + id, new Double(0.1));
+////            playersMap.put("yPlayer" + id, new Double(0.1));
+////            playersMap.put("hPlayer" + id, new Double(0.1));
+////        }
+////
+////        playersMap.put("player" + id, new Integer(id));
+////        numPlayers ++;
+//
+//
+//        broker.send(init(id));   //send initialized world back to the client
+//        //todo doesn't work yet wait for Peter --->
+//        //broker.sendBroadcast(playerJoined(id));  //broadcast to everyone about new player
+//        broker.send(playerJoined(id)); //for testing only (sendBroadcast() will be used instead...)
+    }
+
+    public void objectLeft(int id) {
+
+        System.out.println("\n\n[Server] objectLeft() ----> id = " + id);
+
+        //Changing client's id to ZERO,
+        //meaning client left but all the coordinates are still stored in HashMap
+        (db.get(id)).put("id", 0);
+
+        numPlayers--;
+
+        testMessage(playerLeft(id));
+        testHashMap("");
+
+        broker.sendBroadcast(playerLeft(id));  //tell everyone that player left
+        //broker.send(playerLeft(id));   //for testing only (sendBroadcast() will be used instead...)
+//--------------------------------------------------------------------------
+
+//        //todo doesn't work yet wait for Peter --->
+            //broker.sendBroadcast(playerLeft(id));  //tell everyone that player left
+//        broker.send(playerLeft(id));   //for testing only (sendBroadcast() will be used instead...)
+//
+//        //removing clients that left, note: their coordinates are still stored in the map
+//        playersMap.remove("player" + id);
+//        numPlayers--;
     }
 
     public Message playerJoined(int id) {
 
-        //should be in the form (new Message(ID))
-        Message msg = new Message(0xFF00FF00,0x11EE11EE,0x195CC);
+        Message msg = new Message(id);
 
         msg.setString("mid", "playerJoined");
-        msg.setDouble("xPlayer" + id, (Double)(playersMap.get("xPlayer" + id)));
-        msg.setDouble("yPlayer" + id, (Double)(playersMap.get("yPlayer" + id)));
-        msg.setDouble("hPlayer" + id, (Double)(playersMap.get("hPlayer" + id)));
-        msg.setInteger("player" + id, (Integer)(playersMap.get("player" + id)));
+        msg.setInteger("id", id);
+        msg.setDouble("x", (Double) (db.get(id)).get("x"));
+        msg.setDouble("y", (Double) (db.get(id)).get("y"));
+        msg.setDouble("h", (Double) (db.get(id)).get("h"));
+
+//        msg.setDouble("xPlayer" + id, (Double)(playersMap.get("xPlayer" + id)));
+//        msg.setDouble("yPlayer" + id, (Double)(playersMap.get("yPlayer" + id)));
+//        msg.setDouble("hPlayer" + id, (Double)(playersMap.get("hPlayer" + id)));
 
         return msg;
     }
 
     public Message playerLeft(int id) {
 
-        //should be in the form (new Message(ID))
-        Message msg = new Message(0xFF00FF00,0x11EE11EE,0x195CC);
+        Message msg = new Message(id);
 
         msg.setString("mid", "playerLeft");
-//        msg.setDouble("xPlayer" + id, (Double)(playersMap.get("xPlayer" + id)));
-//        msg.setDouble("yPlayer" + id, (Double)(playersMap.get("yPlayer" + id)));
-//        msg.setDouble("hPlayer" + id, (Double)(playersMap.get("hPlayer" + id)));
-        msg.setInteger("player" + id, (Integer)(playersMap.get("player" + id)));
+        msg.setInteger("id", id);
 
         return msg;
     }
 
-    public static void start(Server server) {
+    public static void main(String args[]) {
 
         /* this needs to be done */
         Broker b = Broker.getInstance();
-        b.registerCallBack(server);
+        b.registerCallBack(new Server());
+        b.setAuthenticationData("AztecServer", "test");
         b.init();
+/*
+        Server server = new Server();
+        server.objectJoined(10);
 
-        /* demo for sending a message back to client */
-        Message m = new Message(0xFF00FF00,0x11EE11EE,0x195CC);
-        m.setString("start", "communication");
-        b.send(m);
+        server.db.get(10).put("x", 777.7);
+        server.db.get(10).put("y", 888.8);
+        //server.db.get(10).put("h", 999.9);
+
+        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
+        server.objectJoined(11);
+        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
+        server.objectJoined(12);
+        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
+        server.objectLeft(10);
+        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
+        server.objectLeft(11);
+        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
+        server.objectJoined(13);
+        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
+        server.objectLeft(13);
+        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
+        server.objectJoined(11);
+        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
+        server.objectJoined(14);
+        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
+        server.objectJoined(13);
+        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
+        server.objectJoined(10);
+        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
+        server.objectLeft(14);
+        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
+*/
     }
 
-    //main function for testing purposes
-    public static void main(String args[]) {
+    // DEBUG: FOR TESTING PURPOSES ONLY
+    public void testHashMap(String str) {
 
-        /* hard coded binding of the client, this will be done later automatically */
-        IndexService s = IndexService.getInstance();
-        try {
-            s.registerDistObject( new DistObject(0xFF00FF00, 103884, new InetSocketAddress(InetAddress.getByName((args.length>0)?args[0]:"127.0.0.1"), 2040)) );
-        } catch(Exception e) {
-            e.printStackTrace();
+        if (str == "static") {
+            System.out.println("--- Static Objects Hash Map ---");
+            Iterator iterator = staticMap.keySet().iterator();
+
+            while (iterator.hasNext()) {
+                String key = iterator.next().toString();
+                String value = staticMap.get(key).toString();
+
+                System.out.println(key + "\t\t" + value);
+            }
         }
+//        else if (str == "players") {
+//            System.out.println("--- Players Hash Map ---");
+//            Iterator iterator = playersMap.keySet().iterator();
+//
+//            while (iterator.hasNext()) {
+//                String key = iterator.next().toString();
+//                String value = playersMap.get(key).toString();
+//
+//                System.out.println(key + "\t\t" + value);
+//            }
+//        }
+//        else if (str == "aztecs") {
+//            System.out.println("--- Aztecs Hash Map ---");
+//            Iterator iterator = aztecsMap.keySet().iterator();
+//
+//            while (iterator.hasNext()) {
+//                String key = iterator.next().toString();
+//                String value = aztecsMap.get(key).toString();
+//
+//                System.out.println(key + "\t\t" + value);
+//            }
+//        }
 
-        start(new Server());
+        else {
+            System.out.println("--- DB Hash Map ---");
+            Iterator iterator = db.keySet().iterator();
+
+            while (iterator.hasNext()) {
+                int key = (Integer) iterator.next();
+                String value = db.get(key).toString();
+
+                System.out.println(key + "\t\t" + value);
+            }
+        }
+    }
+
+    public void testMessage(Message msg) {
+
+        System.out.println("------ MESSAGE RECEIVED ------");
+        System.out.println("Number of fields = " + msg.getFieldNumber());
+        System.out.println(msg);
+        System.out.println("------ END OF MESSAGE  ------");
+
     }
 }
-
