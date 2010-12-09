@@ -12,7 +12,6 @@ class MsgHandler(BrokerCallBack):
     
     def receive(self,request, response):
         if request.getString("mid") == "init":
-            print"init recieved"
             self.client.loadTerrain()
             self.client.createWorld(request)
             
@@ -48,7 +47,7 @@ class AGClient(ShowBase):
         
         self.b.init()
 
-        self.fakeInit(MH)
+        #self.fakeInit(self.MH)
 
         #init-login
 
@@ -56,11 +55,18 @@ class AGClient(ShowBase):
         m = Message()
         m.setString("mid", "init")
 
-        m.setDouble("numTrees", 2)
+        m.setInteger("numTrees", 2)
         m.setDouble("xTree0", -5.0)
         m.setDouble("yTree0", -5.0)
         m.setDouble("xTree1", -5.0)
         m.setDouble("yTree1", -2.0)
+
+        m.setInteger("numHuts", 2)
+        m.setDouble("xHut0", -5.0)
+        m.setDouble("yHut0", -5.0)
+        m.setDouble("xHut1", -5.0)
+        m.setDouble("yHut1", -2.0)
+
 
         
 
@@ -87,28 +93,28 @@ class AGClient(ShowBase):
         self.objectDic[key].model.setPos(o.x,o.y,0)
         
     def createTree(self, xpos, ypos):
-        mod = self.loader.loadModel("models/coin")
+        mod = self.loader.loadModel("models/coin.x")
         mod.reparentTo(self.render)
         mod.setScale(0.5,0.5,0.5)
-        mod.setPos(xpos,ypos)
+        mod.setPos(xpos,ypos,0)
         
     def createHut(self, xpos, ypos):
-        mod = self.loader.loadModel("models/coin")
+        mod = self.loader.loadModel("models/coin.x")
         mod.reparentTo(self.render)
         mod.setScale(0.5,0.5,0.5)
-        mod.setPos(xpos,ypos)
+        mod.setPos(xpos,ypos,0)
         
     def createFort(self, xpos, ypos):
-        mod = self.loader.loadModel("models/coin")
+        mod = self.loader.loadModel("models/coin.x")
         mod.reparentTo(self.render)
         mod.setScale(0.5,0.5,0.5)
-        mod.setPos(xpos,ypos)
+        mod.setPos(xpos,ypos,0)
         
     def createChest(self, xpos, ypos):
-        mod = slef.loader.loadModel("models/coin")
+        mod = slef.loader.loadModel("models/coin.x")
         mod.reparentTo(self.render)
         mod.setScale(0.5,0.5,0.5)
-        mod.setPos(xpos,ypos)
+        mod.setPos(xpos,ypos,0)
 
     def movePlayerTask(self, task):
         #define stuff here
@@ -175,13 +181,13 @@ class AGClient(ShowBase):
         numHuts = m.getInteger("numHuts")
         for i in range(numHuts):
             tmpstr = "Hut" + str(i)
-            self.createObject(m.getDouble("x" + tmpstr),
+            self.createHut(m.getDouble("x" + tmpstr),
                               m.getDouble("y" + tmpstr))
         
         
 
-        '''self.createChest(m.getDouble("xChest"), m.getDouble("yChest"))
-        self.createFort(m.getDouble("xFort"), m.getDouble("yFort"))'''
+        self.createChest(m.getDouble("xChest"), m.getDouble("yChest"))
+        self.createFort(m.getDouble("xFort"), m.getDouble("yFort"))
 
 app = AGClient()
 app.run()
