@@ -14,10 +14,13 @@ class MsgHandler(BrokerCallBack):
         if request.getString("mid") == "init":
             print"init recieved"
             self.client.loadTerrain()
+            self.client.createWorld(request)
+            
             #self.client.myPlayerID = request.getObjectID()
-            #self.client.myPlayer = objectDic[myPlayerID]
             #print self.client.myPlayerID
-            #self.client.createWorld(request)
+            #self.client.myPlayer = self.client.objectDic[self.client.myPlayerID]
+            
+            
         #elif request.getString("mid") == "move":
         #    self.client.moveObject(request)
         #elif request.getString("mid") == "plUpdate":
@@ -52,12 +55,10 @@ class AGClient(ShowBase):
     def fakeInit(self, msgH):
         m = Message()
         m.setString("mid", "init")
-        
-        m.setInteger("numTrees", 2)
-        m.setInteger("Tree0", -1)
+
+        m.setDouble("numTrees", 2)
         m.setDouble("xTree0", -5.0)
         m.setDouble("yTree0", -5.0)
-        m.setInteger("Tree1", -2)
         m.setDouble("xTree1", -5.0)
         m.setDouble("yTree1", -2.0)
 
@@ -77,22 +78,37 @@ class AGClient(ShowBase):
             o.model = self.loader.loadModel("models/coin")  
         elif o.oType == "player":
             o.model = self.loader.loadModel("models/panda-model")
-        elif o.oType == "tree":
-            o.model = self.loader.loadModel("models/coin")
-        elif o.oType == "chest":
-            o.model = self.loader.loadModel("models/coin")
-        elif o.oType == "fort":
-            o.model = self.loader.loadModel("models/coin")  
-        elif o.oType == "hut":
-            o.model = self.loader.loadModel("models/coin")
         elif o.oType == "aztec":
             o.model = self.loader.loadModel("models/coin")
 
         self.objectDic[key] = o
-        print self.objectDic[key].model
         self.objectDic[key].model.reparentTo(self.render)
         self.objectDic[key].model.setScale(0.5, 0.5, 0.5)
         self.objectDic[key].model.setPos(o.x,o.y,0)
+        
+    def createTree(self, xpos, ypos):
+        mod = self.loader.loadModel("models/coin")
+        mod.reparentTo(self.render)
+        mod.setScale(0.5,0.5,0.5)
+        mod.setPos(xpos,ypos)
+        
+    def createHut(self, xpos, ypos):
+        mod = self.loader.loadModel("models/coin")
+        mod.reparentTo(self.render)
+        mod.setScale(0.5,0.5,0.5)
+        mod.setPos(xpos,ypos)
+        
+    def createFort(self, xpos, ypos):
+        mod = self.loader.loadModel("models/coin")
+        mod.reparentTo(self.render)
+        mod.setScale(0.5,0.5,0.5)
+        mod.setPos(xpos,ypos)
+        
+    def createChest(self, xpos, ypos):
+        mod = slef.loader.loadModel("models/coin")
+        mod.reparentTo(self.render)
+        mod.setScale(0.5,0.5,0.5)
+        mod.setPos(xpos,ypos)
 
     def movePlayerTask(self, task):
         #define stuff here
@@ -121,37 +137,20 @@ class AGClient(ShowBase):
             
     def createWorld(self, m):
         print "init recieved\n"
-        numPlayers = m.getInteger("numPlayers")
+
+        #non-Static Objects###############################
+        '''numPlayers = m.getInteger("numPlayers")
         for i in range(numPlayers):
             tmpstr = "Player" + str(i)
-            self.createObject(message.getInteger(player + str(i)),
+            self.createObject(m.getInteger(tmpstr),
                          "player",
                          m.getDouble("x" + tmpstr),
                          m.getDouble("y" + tmpstr),
-                         m.getDouble("h" + tmpstr))
-        
-        numTrees = m.getInteger("numTrees")
-        for i in range(numTrees):
-            tmpstr = "Tree" + str(i)
-            print "making a tree" + str(i)
-            self.createObject(m.getInteger("tree" + str(i)),
-                         "tree",
-                         m.getDouble("x" + tmpstr),
-                         m.getDouble("y" + tmpstr),
-                         m.getDouble("h" + tmpstr))
-        
-        '''numHuts = m.getInteger("numHuts")
-        for i in range(numHuts):
-            tmpstr = "hut" + str(i)
-            self.createObject(m.getInteger(tmpstr),
-                         "hut",
-                         m.getDouble("x" + tmpstr),
-                         m.getDouble("y" + tmpstr),
                          m.getDouble("h" + tmpstr))'''
-        
+            
         '''numAztecs = m.getInteger("numAztecs")
         for i in range(numAztecs):
-            tmpstr = "aztec" + str(i)
+            tmpstr = "Aztec" + str(i)
             self.createObject(m.getInteger(tmpstr),
                          "aztec",
                          m.getDouble("x" + tmpstr),
@@ -160,15 +159,29 @@ class AGClient(ShowBase):
         
         '''numCoins = message.getInteger("numCoins")
         for i in range(numCoins):
-            tmpstr = "coin" + str(i)
-            self.createObject(message.getInteger(tmpstr + "ID"),
+            tmpstr = "Coin" + str(i)
+            self.createObject(m.getInteger(tmpstr),
                          "coin",
                          m.getDouble("x" + tmpstr),
                          m.getDouble("y" + tmpstr),
-                         m.getDouble("h" + tmpstr)0)'''
+                         m.getDouble("h" + tmpstr))'''
+        #static objects####################################
+        numTrees = m.getInteger("numTrees")
+        for i in range(numTrees):
+            tmpstr = "Tree" + str(i)
+            self.createTree(m.getDouble("x" + tmpstr),
+                            m.getDouble("y" + tmpstr))
+        
+        numHuts = m.getInteger("numHuts")
+        for i in range(numHuts):
+            tmpstr = "Hut" + str(i)
+            self.createObject(m.getDouble("x" + tmpstr),
+                              m.getDouble("y" + tmpstr))
+        
+        
 
-        #self.createObject(0, "chest", m.getDouble("xchest"), m.getDouble("ychest"), m.getDouble("chesth"))
-        #self.createObject(0, "fort", m.getDouble("xfort"), m.getDouble("yfort"), m.getDouble("forth"))
+        '''self.createChest(m.getDouble("xChest"), m.getDouble("yChest"))
+        self.createFort(m.getDouble("xFort"), m.getDouble("yFort"))'''
 
 app = AGClient()
 app.run()
