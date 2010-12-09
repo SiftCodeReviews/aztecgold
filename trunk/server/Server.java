@@ -11,19 +11,20 @@ import broker.Broker;
 import broker.object.*;
 import broker.service.com.protocol.*;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 
 public class Server extends BrokerCallBack {
 
-    Broker broker = Broker.getInstance();
-
-    HashMap staticMap = new HashMap();
-
-    //HashMap playersMap = new HashMap();
     //HashMap aztecsMap = new HashMap();
+    //HashMap playersMap = new HashMap();
 
+    Broker broker = Broker.getInstance();
+    HashMap staticMap = new HashMap();
     HashMap<Integer, HashMap> db;
+    Collection<HashMap> collection;
 
     int numPlayers = 0;
 
@@ -100,11 +101,25 @@ public class Server extends BrokerCallBack {
         msg.setDouble("xChest", xChest);
         msg.setDouble("yChest", yChest);
 
-        //aztects
-
-
         //number of players which are currently active
         msg.setInteger("numPlayers", numPlayers);
+
+        int player = numPlayers;
+
+        collection = db.values();
+        for (Iterator<HashMap> hmIterator = collection.iterator(); hmIterator.hasNext();) {
+            HashMap dbValuesMap = hmIterator.next();
+            if(!(dbValuesMap.get("id").equals(0))) {
+                msg.setInteger("player" + player, (Integer)(dbValuesMap.get("id")));
+                msg.setDouble("xPlayer" + player, (Double)(dbValuesMap.get("x")));
+                msg.setDouble("yPlayer" + player, (Double)(dbValuesMap.get("y")));
+                msg.setDouble("hPlayer" + player, (Double)(dbValuesMap.get("h")));
+                player--;
+            }
+        }
+
+        //aztects
+
 
 
 
@@ -139,12 +154,8 @@ public class Server extends BrokerCallBack {
     public Message receive(Message request, Message response) {
 
         System.out.println("------------------------------------------");
-        System.out.println("[Server] receive()");
-        System.out.println("----> Number of fields = " + request.getFieldNumber());
-        System.out.println("----> SessionID = "        + request.getSessionID());
-        System.out.println("----> RequestID = "        + request.getRequestID());
-        System.out.println("----> ObjectID = "         + request.getObjectID());
-        System.out.println("----> Request msg = "      + request);
+        System.out.println("[Server] Request msg. with [" + request.getFieldNumber() +
+                "] fields has been received... \n" + request);
         System.out.println("------------------------------------------");
 
         if(request.getString("mid").equals("moveReq")) {
@@ -155,17 +166,8 @@ public class Server extends BrokerCallBack {
             if(!collision()) {
 
                 //broadcast to all new position of the player
-//                response.setInteger("plUpdate",123456);
-//                response.setDouble("x", xPosP1);
-//                response.setDouble("y", yPosP1);
 //                //broker.sendBroadcast(response);
 //                broker.send(response);
-
-//                response.setBoolean("move", true);
-
-                //testing init; init should be called from objectJoint later on
-                //return init(5);
-
 
 //                return response;
 
@@ -202,76 +204,27 @@ public class Server extends BrokerCallBack {
             System.out.println("[Server] Last saved coordinates are: " + db.get(id));
         }
 
-        testMessage(init(id));
-        testMessage(playerJoined(id));
-        testHashMap("");
+        testMessage(init(id));          //todo delete debug
+        testMessage(playerJoined(id));  //todo delete debug
+        testHashMap("");                //todo delete debug
 
         broker.send(init(id));   //send initialized world back to the client
-//        //todo doesn't work yet wait for Peter --->
         broker.sendBroadcast(playerJoined(id));  //broadcast to everyone about new player
-//        broker.send(playerJoined(id)); //for testing only (sendBroadcast() will be used instead...)
-
-
-//-------------------------------------------------------------
-
-//        System.out.println("[Server] objectJoined() ----> id = " + id);
-//        numPlayers++;
-//
-//        //putting new player in a hash map if player is new
-//        if(!(playersMap.containsValue(id))) {
-//            System.out.println("[Server] Player with id " + id + " is a new player, registering in DB...");
-//
-//            playersMap.put("player" + numPlayers, id);
-//            playersMap.put("xPlayer" + numPlayers, new Double(0.1));
-//            playersMap.put("yPlayer" + numPlayers, new Double(0.1));
-//            playersMap.put("hPlayer" + numPlayers, new Double(0.1));
-//
-//            testHashMap("aztec");
-//        }
-//        else {
-//
-//        }
-//
-////        if(!(playersMap.containsKey("xPlayer" + id))) {
-////            playersMap.put("xPlayer" + id, new Double(0.1));
-////            playersMap.put("yPlayer" + id, new Double(0.1));
-////            playersMap.put("hPlayer" + id, new Double(0.1));
-////        }
-////
-////        playersMap.put("player" + id, new Integer(id));
-////        numPlayers ++;
-//
-//
-//        broker.send(init(id));   //send initialized world back to the client
-//        //todo doesn't work yet wait for Peter --->
-//        //broker.sendBroadcast(playerJoined(id));  //broadcast to everyone about new player
-//        broker.send(playerJoined(id)); //for testing only (sendBroadcast() will be used instead...)
     }
 
     public void objectLeft(int id) {
 
         System.out.println("\n\n[Server] objectLeft() ----> id = " + id);
 
-        //Changing client's id to ZERO,
-        //meaning client left but all the coordinates are still stored in HashMap
+        //Changing client's id to 0 when client disconnects. note: all [x,y,h] coordinates are still stored in the Map
         (db.get(id)).put("id", 0);
 
         numPlayers--;
 
-        testMessage(playerLeft(id));
-        testHashMap("");
+        testMessage(playerLeft(id)); //todo delete debug
+        testHashMap("");             //todo delete debug
 
         broker.sendBroadcast(playerLeft(id));  //tell everyone that player left
-        //broker.send(playerLeft(id));   //for testing only (sendBroadcast() will be used instead...)
-//--------------------------------------------------------------------------
-
-//        //todo doesn't work yet wait for Peter --->
-            //broker.sendBroadcast(playerLeft(id));  //tell everyone that player left
-//        broker.send(playerLeft(id));   //for testing only (sendBroadcast() will be used instead...)
-//
-//        //removing clients that left, note: their coordinates are still stored in the map
-//        playersMap.remove("player" + id);
-//        numPlayers--;
     }
 
     public Message playerJoined(int id) {
@@ -283,10 +236,6 @@ public class Server extends BrokerCallBack {
         msg.setDouble("x", (Double) (db.get(id)).get("x"));
         msg.setDouble("y", (Double) (db.get(id)).get("y"));
         msg.setDouble("h", (Double) (db.get(id)).get("h"));
-
-//        msg.setDouble("xPlayer" + id, (Double)(playersMap.get("xPlayer" + id)));
-//        msg.setDouble("yPlayer" + id, (Double)(playersMap.get("yPlayer" + id)));
-//        msg.setDouble("hPlayer" + id, (Double)(playersMap.get("hPlayer" + id)));
 
         return msg;
     }
@@ -308,40 +257,37 @@ public class Server extends BrokerCallBack {
         b.registerCallBack(new Server());
         b.setAuthenticationData("AztecServer", "test");
         b.init();
-/*
+
         Server server = new Server();
+/*
         server.objectJoined(10);
 
         server.db.get(10).put("x", 777.7);
         server.db.get(10).put("y", 888.8);
-        //server.db.get(10).put("h", 999.9);
+        server.db.get(10).put("h", 999.9);
 
-        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
         server.objectJoined(11);
-        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
         server.objectJoined(12);
-        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
         server.objectLeft(10);
-        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
         server.objectLeft(11);
-        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
         server.objectJoined(13);
-        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
         server.objectLeft(13);
-        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
         server.objectJoined(11);
-        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
         server.objectJoined(14);
-        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
-        server.objectJoined(13);
-        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
         server.objectJoined(10);
-        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
+
+        server.db.get(14).put("x", -1111.1111);
+        server.db.get(14).put("y", -2222.2222);
+        server.db.get(14).put("h", -33333.3333);
+
         server.objectLeft(14);
-        System.out.println("TOTAL # OF PLAYERS LOGGED IN-------> [" + server.numPlayers + "]");
+        server.objectJoined(13);
+        server.objectJoined(14);
 */
     }
 
+
+    //todo delete debug
     // DEBUG: FOR TESTING PURPOSES ONLY
     public void testHashMap(String str) {
 
@@ -394,10 +340,10 @@ public class Server extends BrokerCallBack {
 
     public void testMessage(Message msg) {
 
-        System.out.println("------ MESSAGE RECEIVED ------");
-        System.out.println("Number of fields = " + msg.getFieldNumber());
-        System.out.println(msg);
-        System.out.println("------ END OF MESSAGE  ------");
+        System.out.println("------------------------------------------");
+        System.out.println("[Server] Response msg. with [" + msg.getFieldNumber() +
+                "] fields has been send to client... \n" + msg);
+        System.out.println("------------------------------------------");
 
     }
 }
