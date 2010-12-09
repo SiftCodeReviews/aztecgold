@@ -107,9 +107,8 @@ public class NetworkService extends BrokerServiceWrapper {
 			/* requestID 0xFFFFFFn indicates a broadcast message */
 			else  {
 			
-				System.out.println("BROADCAST");
 				Enumeration<SocketAddress> socketlist = this.index.getAllSocketAddresses();
-				
+								
 				while(socketlist.hasMoreElements()) {
 				
 					dst0 = socketlist.nextElement();

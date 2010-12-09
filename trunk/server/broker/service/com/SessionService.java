@@ -86,166 +86,172 @@ public class SessionService extends BrokerServiceWrapper {
 		int requestID = m.getRequestID();
 		Integer mobj = new Integer(m.getObjectID());
 		
-		try {
-		
-			/*
-			 * received ObjectHello
-			 */
-			if ( requestID == 0x80000000 ) {
-				
-				SessionObject so;
-				
-				/* in case of an ObjectHello no SessionObject shall exists */
-				if ( (so=this.initSessionList.get(mobj)) == null ) {
-				
-					/* get associated socket */
-					InetSocketAddress isa	= (InetSocketAddress)this.index.lookupSocketAddress(m.getObjectID());
-					byte[] ip				= isa.getAddress().getAddress();
-					
-					/* create session object */
-					so = new SessionObject(m.getObjectID(), isa);
-
-					synchronized(this.initSessionList) {
-						this.initSessionList.put(mobj, so);
-					}
-					
-					/* creating the response */
-					Message response = new Message(so.getSessionID(), (requestID+1), m.getObjectID());
-					response.setString("ip", String.format("%d.%d.%d.%d", ByteConversion.byteToUINT(ip[0]), ByteConversion.byteToUINT(ip[1]), ByteConversion.byteToUINT(ip[2]), ByteConversion.byteToUINT(ip[3])));
-					response.setInteger("port", isa.getPort());
-					response.setLong("challenge", so.getChallenge());
-				
-					return response;
-
-				
-				}
-									
-			}
+		if ( (requestID&0x80000000) != 0 ) {
 			
-			/*
-			 * received ObjectAuth
-			 */
-			else if ( requestID == 0x80000002 ) {
+			try {
 			
-				SessionObject so;
-				
-				/* if the SessionObject does not exist or the request is out of order */
-				if ( (so=this.initSessionList.get(mobj)) != null && so.nextRequest(requestID) ) {
-
-					Message response = new Message(m.getSessionID(), (requestID+1), m.getObjectID());
-					Object userServiceReturn = null;
-
-					/* store username and auth string in SessionObject */
-					so.setAuthenticationData(m.getString("user"), m.getString("response"));	
+				/*
+				 * received ObjectHello
+				 */
+				if ( requestID == 0x80000000 ) {
 					
-					/* pass the SessionObject to the UserService on top, to check the authentication data */
-					if ( userService != null )
-						userServiceReturn = userService.sapLowerLayer(so);
+					SessionObject so;
 					
-					/* send the authentication successfull message back in case the return value from UserService is equal to the SessionObject */
-					if ( userServiceReturn == so ) {
+					/* in case of an ObjectHello no SessionObject shall exists */
+					if ( (so=this.initSessionList.get(mobj)) == null ) {
+					
+						/* get associated socket */
+						InetSocketAddress isa	= (InetSocketAddress)this.index.lookupSocketAddress(m.getObjectID());
+						byte[] ip				= isa.getAddress().getAddress();
 						
-						/* set timestamp in session to avoid expiration */
-						so.touch();
-						
-						/* set auth to true, that indicates successfull authentication */
-						response.setBoolean("auth", true);
-						
-						/* return the actual ObjectID, as the message objectID and the integer field */
-						int objectID	= so.getObjectID();
-						response.setInteger("objectid", objectID);
-						response.setObjectID(objectID);
-						
-						/* remap temporary to real object id */
-						this.index.reRegisterSocketAddress(m.getObjectID(), objectID);
-											
-						/* insert ticket */
-						response.setString("ticket", this.createTicket(so) );
+						/* create session object */
+						so = new SessionObject(m.getObjectID(), isa);
 
-
-
-						/* prepare for look up */
-						SessionObject luSess = so;
-						String lookupName = null;
-						
-						/* try a lookup request if included */
-						try {
-							lookupName = m.getString("luName");
-							luSess = userService.getSession(lookupName);
-						}
-						catch(RuntimeException e) {}
-						
-						/* in case the lookup result (luSess) is null, there was no result according to the request, an error message will be send */
-						if ( luSess == null )
-							throw new RuntimeException("[SessionService] Lookup not successful!");
-							
-						/* in case luSess is not equal to so, that means the look up was successfull and a proper look up response will be send back  */
-						else if ( luSess != so ) {
-						
-							InetSocketAddress isa	= (InetSocketAddress)luSess.getSocketAddress();
-							byte[] ip				= isa.getAddress().getAddress();
-						
-							response.setString("luName", lookupName);
-							response.setString("luIP", String.format("%d.%d.%d.%d",ByteConversion.byteToUINT(ip[0]), ByteConversion.byteToUINT(ip[1]), ByteConversion.byteToUINT(ip[2]), ByteConversion.byteToUINT(ip[3])));
-							response.setInteger("luObjID", luSess.getObjectID());
-							response.setInteger("luPort", isa.getPort());
-							
-						}
-						
-						/* remove Session from init list after successful authentication */
 						synchronized(this.initSessionList) {
-							this.initSessionList.remove(mobj);
+							this.initSessionList.put(mobj, so);
 						}
-												
+						
+						/* creating the response */
+						Message response = new Message(so.getSessionID(), (requestID+1), m.getObjectID());
+						response.setString("ip", String.format("%d.%d.%d.%d", ByteConversion.byteToUINT(ip[0]), ByteConversion.byteToUINT(ip[1]), ByteConversion.byteToUINT(ip[2]), ByteConversion.byteToUINT(ip[3])));
+						response.setInteger("port", isa.getPort());
+						response.setLong("challenge", so.getChallenge());
+					
+						return response;
+
+					
 					}
-					
-					/* decline authentication */
-					else {
-					
-						response.setBoolean("auth", false);
 										
+				}
+				
+				/*
+				 * received ObjectAuth
+				 */
+				else if ( requestID == 0x80000002 ) {
+				
+					SessionObject so;
+					
+					/* if the SessionObject does not exist or the request is out of order */
+					if ( (so=this.initSessionList.get(mobj)) != null && so.nextRequest(requestID) ) {
+
+						Message response = new Message(m.getSessionID(), (requestID+1), m.getObjectID());
+						Object userServiceReturn = null;
+
+						/* store username and auth string in SessionObject */
+						so.setAuthenticationData(m.getString("user"), m.getString("response"));	
+						
+						/* pass the SessionObject to the UserService on top, to check the authentication data */
+						if ( userService != null )
+							userServiceReturn = userService.sapLowerLayer(so);
+						
+						/* send the authentication successfull message back in case the return value from UserService is equal to the SessionObject */
+						if ( userServiceReturn == so ) {
+							
+							/* set timestamp in session to avoid expiration */
+							so.touch();
+							
+							/* set auth to true, that indicates successfull authentication */
+							response.setBoolean("auth", true);
+							
+							/* return the actual ObjectID, as the message objectID and the integer field */
+							int objectID	= so.getObjectID();
+							response.setInteger("objectid", objectID);
+							response.setObjectID(objectID);
+							
+							/* remap temporary to real object id */
+							this.index.reRegisterSocketAddress(m.getObjectID(), objectID);
+												
+							/* insert ticket */
+							response.setString("ticket", this.createTicket(so) );
+
+
+
+							/* prepare for look up */
+							SessionObject luSess = so;
+							String lookupName = null;
+							
+							/* try a lookup request if included */
+							try {
+								lookupName = m.getString("luName");
+								luSess = userService.getSession(lookupName);
+							}
+							catch(RuntimeException e) {}
+							
+							/* in case the lookup result (luSess) is null, there was no result according to the request, an error message will be send */
+							if ( luSess == null )
+								throw new RuntimeException("[SessionService] Lookup not successful!");
+								
+							/* in case luSess is not equal to so, that means the look up was successfull and a proper look up response will be send back  */
+							else if ( luSess != so ) {
+							
+								InetSocketAddress isa	= (InetSocketAddress)luSess.getSocketAddress();
+								byte[] ip				= isa.getAddress().getAddress();
+							
+								response.setString("luName", lookupName);
+								response.setString("luIP", String.format("%d.%d.%d.%d",ByteConversion.byteToUINT(ip[0]), ByteConversion.byteToUINT(ip[1]), ByteConversion.byteToUINT(ip[2]), ByteConversion.byteToUINT(ip[3])));
+								response.setInteger("luObjID", luSess.getObjectID());
+								response.setInteger("luPort", isa.getPort());
+								
+							}
+							
+							/* remove Session from init list after successful authentication */
+							synchronized(this.initSessionList) {
+								this.initSessionList.remove(mobj);
+							}
+													
+						}
+						
+						/* decline authentication */
+						else {
+						
+							response.setBoolean("auth", false);
+											
+						}
+
+						return response;
+						
+					}
+					
+				}
+				
+				/*
+				 * received KeepAlive
+				 */
+				else if ( requestID == 0x8000000A ) {
+
+					//System.out.println("[SessionService] sapLowerLayer() - received KeepAlive from " + m.getObjectID());
+					SessionObject tso;
+
+					int objSize = m.getInteger("objSize");
+					for(int i=0; i < objSize; i++) {
+					
+						tso = this.userService.getSession(m.getInteger("obj"+i));
+						tso.touch();
+						
+						//System.out.println("[SessionService] sapLowerLayer() - touch id: " + tso.getObjectID());
+					
 					}
 
-					return response;
-					
+					/* keep alive back to the client is just an empty message */
+					return new Message(m);
+
 				}
 				
 			}
+			catch(Exception e) {}
 			
-			/*
-			 * received KeepAlive
-			 */
-			else if ( requestID == 0x8000000A ) {
-
-				//System.out.println("[SessionService] sapLowerLayer() - received KeepAlive from " + m.getObjectID());
-				SessionObject tso;
-
-				int objSize = m.getInteger("objSize");
-				for(int i=0; i < objSize; i++) {
-				
-					tso = this.userService.getSession(m.getInteger("obj"+i));
-					tso.touch();
-					
-					//System.out.println("[SessionService] sapLowerLayer() - touch id: " + tso.getObjectID());
-				
-				}
-
-				/* keep alive back to the client is just an empty message */
-				return new Message(m);
-
+			/* in case this code segment is reached an error has occured, so send an error back */
+			synchronized(this.initSessionList) {
+				this.initSessionList.remove(mobj);
 			}
+				
+			Message response = new Message(m);
+			response.setError();
+			return response;
 			
 		}
-		catch(Exception e) {}
 		
-		/* in case this code segment is reached an error has occured, so send an error back */
-		synchronized(this.initSessionList) {
-			this.initSessionList.remove(mobj);
-		}
-			
-		Message response = new Message(m);
-		response.setError();
-		return response;
+		return null;
 	
 	}
 	

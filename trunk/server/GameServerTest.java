@@ -23,7 +23,8 @@ public class GameServerTest extends BrokerCallBack {
 		System.out.println("[GameServerTest] objectJoined() - id="+id);
 		
 		Message m = new Message(id);
-		Broker.getInstance().send(m);
+		m.setString("mid","init");
+		Broker.getInstance().sendBroadcast(m);
 	
 	}
 	
