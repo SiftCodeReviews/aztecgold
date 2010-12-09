@@ -14,7 +14,10 @@ class MsgHandler(BrokerCallBack):
         if request.getString("mid") == "init":
             print"init recieved"
             self.client.loadTerrain()
-            self.client.createWorld(request)
+            #self.client.myPlayerID = request.getObjectID()
+            #self.client.myPlayer = objectDic[myPlayerID]
+            #print self.client.myPlayerID
+            #self.client.createWorld(request)
         #elif request.getString("mid") == "move":
         #    self.client.moveObject(request)
         #elif request.getString("mid") == "plUpdate":
@@ -30,14 +33,19 @@ class AGClient(ShowBase):
         ShowBase.__init__(self)
         self.objectDic = {}
         
+        
         self.b = Broker()
         self.MH = MsgHandler()
         self.MH.setClient(self)
         self.b.registerCallBack(self.MH)
+
+        self.b.setAuthenticationData("test1","test")
+        self.b.setServerName("AztecServer")
+        self.b._registrarAddress = "127.0.0.1"
+        
         self.b.init()
 
-        #self.fakeInit(MH)
-        #self.myPlayer
+        self.fakeInit(MH)
 
         #init-login
 
@@ -52,6 +60,8 @@ class AGClient(ShowBase):
         m.setInteger("Tree1", -2)
         m.setDouble("xTree1", -5.0)
         m.setDouble("yTree1", -2.0)
+
+        
 
         dummy = Message()
         msgH.receive(m, dummy)
@@ -112,13 +122,13 @@ class AGClient(ShowBase):
     def createWorld(self, m):
         print "init recieved\n"
         numPlayers = m.getInteger("numPlayers")
-        '''for i in range(numPlayers):
-            tmpstr = "player" + str(i)
-            self.createObject(message.getInteger(tmpstr + "ID"),
+        for i in range(numPlayers):
+            tmpstr = "Player" + str(i)
+            self.createObject(message.getInteger(player + str(i)),
                          "player",
                          m.getDouble("x" + tmpstr),
                          m.getDouble("y" + tmpstr),
-                         m.getDouble("h" + tmpstr))'''
+                         m.getDouble("h" + tmpstr))
         
         numTrees = m.getInteger("numTrees")
         for i in range(numTrees):
