@@ -141,8 +141,6 @@ public class Server extends BrokerCallBack {
 
         collection = db.values();
 
-        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@collection" + collection);
-
         for (Iterator<HashMap> hmIterator = collection.iterator(); hmIterator.hasNext();) {
             HashMap dbValuesMap = hmIterator.next();
             if(!(dbValuesMap.get("id").equals(0))) {
@@ -194,10 +192,13 @@ public class Server extends BrokerCallBack {
 
             if(!collision()) {
 
+
 //                //broadcast to all new position of the player
 //                broker.sendBroadcast(response);
 //
 //                return response;
+                //todo when there is a collision with the coin or chest, send playerStatus() back to that client
+                //playerStatus(request.getObjectID());
 
                 return null;
             }
@@ -224,6 +225,8 @@ public class Server extends BrokerCallBack {
             players.put("x", 0.1);
             players.put("y", 0.1);
             players.put("h", 0.1);
+            players.put("score", 0);
+            players.put("coins", 0);
             db.put(id, players);
         }
         else {
@@ -278,6 +281,18 @@ public class Server extends BrokerCallBack {
         return msg;
     }
 
+    public void playerStatus(int id) {
+
+        Message msg = new Message(id);
+
+        msg.setString("mid", "playerStatus");
+        msg.setInteger("score", (Integer)(db.get(id)).get("score"));
+        msg.setInteger("coins", (Integer)(db.get(id)).get("coins"));
+
+        broker.send(msg);
+
+    }
+
     public static void main(String args[]) {
 
         /* this needs to be done */
@@ -285,7 +300,8 @@ public class Server extends BrokerCallBack {
         b.registerCallBack(new Server());
         b.setAuthenticationData("AztecServer", "test");
         b.init();
-/*
+
+
         Server server = new Server();
         server.objectJoined(10);
 
@@ -298,6 +314,10 @@ public class Server extends BrokerCallBack {
         server.objectLeft(10);
         server.objectLeft(11);
         server.objectJoined(13);
+
+        server.db.get(12).put("score", 12345);
+        server.db.get(12).put("coins", 987);
+
         server.objectLeft(13);
         server.objectJoined(11);
         server.objectJoined(14);
@@ -310,11 +330,10 @@ public class Server extends BrokerCallBack {
         server.objectLeft(14);
         server.objectJoined(13);
         server.objectJoined(14);
-*/
     }
 
 
-    //todo delete debug
+    //todo delete debug 
     // DEBUG: FOR TESTING PURPOSES ONLY
     public void testHashMap(String str) {
 
