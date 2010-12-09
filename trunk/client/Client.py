@@ -14,10 +14,11 @@ class MsgHandler(BrokerCallBack):
         if request.getString("mid") == "init":
             self.client.loadTerrain()
             self.client.createWorld(request)
+            #print request.toString()
             
-            #self.client.myPlayerID = request.getObjectID()
-            #print self.client.myPlayerID
-            #self.client.myPlayer = self.client.objectDic[self.client.myPlayerID]
+            self.client.myPlayerID = request.getObjectID()
+            print self.client.myPlayerID
+            self.client.myPlayer = self.client.objectDic[self.client.myPlayerID]
             
             
         #elif request.getString("mid") == "move":
@@ -148,9 +149,9 @@ class AGClient(ShowBase):
 
         #non-Static Objects###############################
         numPlayers = m.getInteger("numPlayers")
-        for i in range(numPlayers):
-            tmpstr = "Player" + str(i)
-            self.createObject(m.getInteger("player" + str(i)),
+        for i in range(numPlayers+1):
+            tmpstr = "Player" + str(i+1)
+            self.createObject(m.getInteger("player" + str(i+1)),
                          "player",
                          m.getDouble("x" + tmpstr),
                          m.getDouble("y" + tmpstr),
@@ -175,14 +176,14 @@ class AGClient(ShowBase):
                          m.getDouble("h" + tmpstr))'''
         #static objects####################################
         numTrees = m.getInteger("numTrees")
-        for i in range(numTrees):
-            tmpstr = "Tree" + str(i)
+        for i in range(numTrees+1):
+            tmpstr = "Tree" + str(i+1)
             self.createTree(m.getDouble("x" + tmpstr),
                             m.getDouble("y" + tmpstr))
         
         numHuts = m.getInteger("numHuts")
-        for i in range(numHuts):
-            tmpstr = "Hut" + str(i)
+        for i in range(numHuts+1):
+            tmpstr = "Hut" + str(i+1)
             self.createHut(m.getDouble("x" + tmpstr),
                               m.getDouble("y" + tmpstr))
         
