@@ -14,14 +14,12 @@ import broker.service.com.protocol.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Set;
 
 public class Server extends BrokerCallBack {
 
-    //HashMap aztecsMap = new HashMap();
-    //HashMap playersMap = new HashMap();
-
     Broker broker = Broker.getInstance();
+    HashMap aztecsMap = new HashMap();
+    HashMap coinsMap = new HashMap();
     HashMap staticMap = new HashMap();
     HashMap<Integer, HashMap> db;
     Collection<HashMap> collection;
@@ -58,12 +56,52 @@ public class Server extends BrokerCallBack {
         staticMap.put("yHut3", new Double(-13.0));
     }
 
-//    int numAztecs = 15;
-//    {
-//        for (int i = 1; i <= numAztecs; i++) {
-//            aztecsMap.put("aztec" + numAztecs, -1 * numAztecs);
-//        }
-//    }
+    int numAztecs = 4;
+    {
+        aztecsMap.put("aztec1", new Integer(-1));
+        aztecsMap.put("xAztec1", new Double(1.1));
+        aztecsMap.put("yAztec1", new Double(2.2));
+        aztecsMap.put("hAztec1", new Double(3.3));
+
+        aztecsMap.put("aztec2", new Integer(-2));
+        aztecsMap.put("xAztec2", new Double(1.1));
+        aztecsMap.put("yAztec2", new Double(2.2));
+        aztecsMap.put("hAztec2", new Double(3.3));
+
+        aztecsMap.put("aztec3", new Integer(-3));
+        aztecsMap.put("xAztec3", new Double(1.1));
+        aztecsMap.put("yAztec3", new Double(2.2));
+        aztecsMap.put("hAztec3", new Double(3.3));
+
+        aztecsMap.put("aztec4", new Integer(-4));
+        aztecsMap.put("xAztec4", new Double(1.1));
+        aztecsMap.put("yAztec4", new Double(2.2));
+        aztecsMap.put("hAztec4", new Double(3.3));
+
+    }
+
+    int numCoins = 5;
+    {
+        coinsMap.put("coin1", new Integer(-101));
+        coinsMap.put("xCoin1", new Double(1.1));
+        coinsMap.put("yCoin1", new Double(2.2));
+
+        coinsMap.put("coin2", new Integer(-102));
+        coinsMap.put("xCoin2", new Double(1.1));
+        coinsMap.put("yCoin2", new Double(2.2));
+
+        coinsMap.put("coin3", new Integer(-103));
+        coinsMap.put("xCoin3", new Double(1.1));
+        coinsMap.put("yCoin3", new Double(2.2));
+
+        coinsMap.put("coin4", new Integer(-104));
+        coinsMap.put("xCoin4", new Double(1.1));
+        coinsMap.put("yCoin4", new Double(2.2));
+
+        coinsMap.put("coin5", new Integer(-105));
+        coinsMap.put("xCoin5", new Double(1.1));
+        coinsMap.put("yCoin5", new Double(2.2));
+    }
 
     public Server() {
 
@@ -79,18 +117,14 @@ public class Server extends BrokerCallBack {
 
         //trees
         msg.setInteger("numTrees", numTrees);
-
         for (int i = 1; i <= numTrees; i++) {
-
             msg.setDouble("xTree" + i, (Double)(staticMap.get("xTree" + i)));
             msg.setDouble("yTree" + i, (Double)(staticMap.get("yTree" + i)));
         }
 
         //huts
         msg.setInteger("numHuts", numHuts);
-
         for (int i = 1; i <= numHuts; i++) {
-
             msg.setDouble("xHut" + i, (Double)(staticMap.get("xHut" + i)));
             msg.setDouble("yHut" + i, (Double)(staticMap.get("yHut" + i)));
         }
@@ -102,11 +136,13 @@ public class Server extends BrokerCallBack {
         msg.setDouble("yChest", yChest);
 
         //number of players which are currently active
+        int player = numPlayers;
         msg.setInteger("numPlayers", numPlayers);
 
-        int player = numPlayers;
-
         collection = db.values();
+
+        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@collection" + collection);
+
         for (Iterator<HashMap> hmIterator = collection.iterator(); hmIterator.hasNext();) {
             HashMap dbValuesMap = hmIterator.next();
             if(!(dbValuesMap.get("id").equals(0))) {
@@ -119,28 +155,21 @@ public class Server extends BrokerCallBack {
         }
 
         //aztects
+        msg.setInteger("numAztecs", numAztecs);
+        for (int i = 1; i <= numAztecs; i++) {
+            msg.setInteger("Aztec" + i, i*-1);
+            msg.setDouble("xAztec" + i, (Double)(aztecsMap.get("xAztec" + i)));
+            msg.setDouble("yAztec" + i, (Double)(aztecsMap.get("yAztec" + i)));
+            msg.setDouble("hAztec" + i, (Double)(aztecsMap.get("hAztec" + i)));
+        }
 
-
-
-
-//
-//
-////todo ........ change, add aztecs
-//        Iterator iterator = playersMap.keySet().iterator();
-//
-//        while (iterator.hasNext()) {
-//            String key = iterator.next().toString();
-//
-//            if(key.charAt(0) == 'p')
-//                msg.setInteger(key, (Integer)playersMap.get(key));
-//            else
-//                msg.setDouble(key, (Double)playersMap.get(key));
-//        }
-////todo....
-
-
-
-
+        //coins
+        msg.setInteger("numCoins", numCoins);
+        for (int i = 1; i <= numCoins; i++) {
+            msg.setInteger("coin" + i, -100+i*-1);
+            msg.setDouble("xCoin" + i, (Double)(coinsMap.get("xCoin" + i)));
+            msg.setDouble("yCoin" + i, (Double)(coinsMap.get("yCoin" + i)));
+        }
 
         return msg;
     }
@@ -165,10 +194,9 @@ public class Server extends BrokerCallBack {
 
             if(!collision()) {
 
-                //broadcast to all new position of the player
-//                //broker.sendBroadcast(response);
-//                broker.send(response);
-
+//                //broadcast to all new position of the player
+//                broker.sendBroadcast(response);
+//
 //                return response;
 
                 return null;
@@ -257,9 +285,8 @@ public class Server extends BrokerCallBack {
         b.registerCallBack(new Server());
         b.setAuthenticationData("AztecServer", "test");
         b.init();
-
-        Server server = new Server();
 /*
+        Server server = new Server();
         server.objectJoined(10);
 
         server.db.get(10).put("x", 777.7);
