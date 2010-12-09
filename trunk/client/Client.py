@@ -83,7 +83,7 @@ class AGClient(ShowBase):
         if o.oType == "coin":
             o.model = self.loader.loadModel("models/coin")  
         elif o.oType == "player":
-            o.model = self.loader.loadModel("models/panda-model")
+            o.model = self.loader.loadModel("models/shit")
         elif o.oType == "aztec":
             o.model = self.loader.loadModel("models/coin")
 
@@ -93,25 +93,27 @@ class AGClient(ShowBase):
         self.objectDic[key].model.setPos(o.x,o.y,0)
         
     def createTree(self, xpos, ypos):
-        mod = self.loader.loadModel("models/coin.x")
+        mod = self.loader.loadModel("models/shit")
+        texture = loader.loadTexture("models/maps/envir-reeds.png")
+        mod.setTexture(texture)
         mod.reparentTo(self.render)
         mod.setScale(0.5,0.5,0.5)
         mod.setPos(xpos,ypos,0)
         
     def createHut(self, xpos, ypos):
-        mod = self.loader.loadModel("models/coin.x")
+        mod = self.loader.loadModel("models/shit")
         mod.reparentTo(self.render)
         mod.setScale(0.5,0.5,0.5)
         mod.setPos(xpos,ypos,0)
         
     def createFort(self, xpos, ypos):
-        mod = self.loader.loadModel("models/coin.x")
+        mod = self.loader.loadModel("models/coin")
         mod.reparentTo(self.render)
         mod.setScale(0.5,0.5,0.5)
         mod.setPos(xpos,ypos,0)
         
     def createChest(self, xpos, ypos):
-        mod = slef.loader.loadModel("models/coin.x")
+        mod = self.loader.loadModel("models/coin")
         mod.reparentTo(self.render)
         mod.setScale(0.5,0.5,0.5)
         mod.setPos(xpos,ypos,0)
@@ -145,19 +147,19 @@ class AGClient(ShowBase):
         print "init recieved\n"
 
         #non-Static Objects###############################
-        '''numPlayers = m.getInteger("numPlayers")
+        numPlayers = m.getInteger("numPlayers")
         for i in range(numPlayers):
             tmpstr = "Player" + str(i)
-            self.createObject(m.getInteger(tmpstr),
+            self.createObject(m.getInteger("player" + str(i)),
                          "player",
                          m.getDouble("x" + tmpstr),
                          m.getDouble("y" + tmpstr),
-                         m.getDouble("h" + tmpstr))'''
+                         m.getDouble("h" + tmpstr))
             
         '''numAztecs = m.getInteger("numAztecs")
         for i in range(numAztecs):
             tmpstr = "Aztec" + str(i)
-            self.createObject(m.getInteger(tmpstr),
+            self.createObject(m.getInteger(aztec + str(i)),
                          "aztec",
                          m.getDouble("x" + tmpstr),
                          m.getDouble("y" + tmpstr),
@@ -166,7 +168,7 @@ class AGClient(ShowBase):
         '''numCoins = message.getInteger("numCoins")
         for i in range(numCoins):
             tmpstr = "Coin" + str(i)
-            self.createObject(m.getInteger(tmpstr),
+            self.createObject(m.getInteger(coin + str(i)),
                          "coin",
                          m.getDouble("x" + tmpstr),
                          m.getDouble("y" + tmpstr),
