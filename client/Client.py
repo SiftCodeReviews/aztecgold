@@ -1,10 +1,13 @@
 from direct.showbase.ShowBase import ShowBase
 from direct.task import Task
+import thread
 import sys
 sys.path.append('broker')
 from Broker import *
 from BrokerCallBack import *
 from Message import *
+
+
 
 class MsgHandler(BrokerCallBack):
     def setClient(self, agclient):
@@ -20,7 +23,6 @@ class MsgHandler(BrokerCallBack):
             print self.client.myPlayerID
             self.client.myPlayer = self.client.objectDic[self.client.myPlayerID]
             
-            
         #elif request.getString("mid") == "move":
         #    self.client.moveObject(request)
         #elif request.getString("mid") == "plUpdate":
@@ -35,7 +37,8 @@ class AGClient(ShowBase):
     def __init__(self):
         ShowBase.__init__(self)
         self.objectDic = {}
-        
+        self.keyboardLock = thread.allocate_lock()
+        self.initControls()
         
         self.b = Broker()
         self.MH = MsgHandler()
@@ -47,6 +50,7 @@ class AGClient(ShowBase):
         self.b._registrarAddress = "127.0.0.1"
         
         self.b.init()
+        
 
         #self.fakeInit(self.MH)
 
@@ -135,6 +139,78 @@ class AGClient(ShowBase):
         o.y = m.getDouble("y")
         o.h = m.getDouble("h")
         o.model.setPos(o.x,o.y,0)
+        
+    def changeHeading(self, key):
+        pass
+        
+    def changeHeadingQQQ(self, key):
+        if key == "arrow_up":
+            self.up = 1
+        elif key == "arrow_up-up":
+            self.up = 0
+        elif key == "arrow_down":
+            self.down = 1
+        elif key == "arrow_down-up":
+            self.down = 0
+        elif key == "arrow_left":
+            self.left = 1
+        elif key == "arrow_left-up":
+            self.left = 0
+        elif key == "arrow_right":
+            self.right = 1
+        elif key == "arrow_right-up":
+            self.right = 0
+        vmove = self.up
+        vmove = vmove - self.down
+        hmove = self.right
+        hmove = hmove -self.left
+        heading = 1000.0
+        if hmove > 0:
+            heading = 90.0
+        elif hmove < 0:
+            heading = 270
+        if vmove > 0:
+            heading = 0.0
+            if hmove > 0:
+                heading = 45
+            elif hmove < 0:
+                heading = 315
+        elif vmove < 0:
+            heading = 180.0
+            if hmove > 0:
+                heading = 135.0
+            elif hmove < 0:
+                heading = 225.0
+        print heading
+    def initControls(self):
+        self.up = 0
+        self.down = 0
+        self.left = 0
+        self.right = 0
+        self.keyboardLock.acquire()
+        self.accept("arrow_up", self.changeHeading, ["arrow_up"])
+        self.keyboardLock.release()
+        self.keyboardLock.acquire()
+        self.accept("arrow_up-up", self.changeHeading, ["arrow_up-up"])
+        self.keyboardLock.release()
+        self.keyboardLock.acquire()
+        self.accept("arrow_down", self.changeHeading, ["arrow_down"])
+        self.keyboardLock.release()
+        self.keyboardLock.acquire()
+        self.accept("arrow_down-up", self.changeHeading, ["arrow_down-up"])
+        self.keyboardLock.release()
+        self.keyboardLock.acquire()
+        self.accept("arrow_left", self.changeHeading, ["arrow_left"])
+        self.keyboardLock.release()
+        self.keyboardLock.acquire()
+        self.accept("arrow_left-up", self.changeHeading, ["arrow_left-up"])
+        self.keyboardLock.release()
+        self.keyboardLock.acquire()
+        self.accept("arrow_right", self.changeHeading, ["arrow_right"])
+        self.keyboardLock.release()
+        self.keyboardLock.acquire()
+        self.accept("arrow_right-up", self.changeHeading, ["arrow_right-up"])
+        self.keyboardLock.release()
         
     def loadTerrain(self):
         self.environ = self.loader.loadModel("models/environment")
