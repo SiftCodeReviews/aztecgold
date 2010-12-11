@@ -106,7 +106,7 @@ class AGClient(ShowBase):
         mod.setPos(xpos,ypos,0)
         
     def createHut(self, xpos, ypos):
-        mod = self.loader.loadModel("models/shit")
+        mod = self.loader.loadModel("models/hut")
         mod.reparentTo(self.render)
         mod.setScale(0.5,0.5,0.5)
         mod.setPos(xpos,ypos,0)
@@ -118,7 +118,7 @@ class AGClient(ShowBase):
         mod.setPos(xpos,ypos,0)
         
     def createChest(self, xpos, ypos):
-        mod = self.loader.loadModel("models/coin")
+        mod = self.loader.loadModel("models/chest")
         mod.reparentTo(self.render)
         mod.setScale(0.5,0.5,0.5)
         mod.setPos(xpos,ypos,0)
@@ -127,23 +127,13 @@ class AGClient(ShowBase):
         #define stuff here
         pass
     def moveObject(self, m):
-        if m.getString("objType") == "player":
-            o = playerDic[m.getInteger("ID")]
-        elif m.getString("objType") == "coin":
-            o = coinDic[m.getInteger("ID")]
-        elif m.getString("objType") == "aztec":
-            o = aztecDic[m.getInteger("ID")]
-        else:
-            return
+        o = pobjectDic[m.getInteger("ID")]
         o.x = m.getDouble("x")
         o.y = m.getDouble("y")
         o.h = m.getDouble("h")
         o.model.setPos(o.x,o.y,0)
         
     def changeHeading(self, key):
-        pass
-        
-    def changeHeadingQQQ(self, key):
         if key == "arrow_up":
             self.up = 1
         elif key == "arrow_up-up":
@@ -213,12 +203,12 @@ class AGClient(ShowBase):
         self.keyboardLock.release()
         
     def loadTerrain(self):
-        self.environ = self.loader.loadModel("models/environment")
+        self.environ = self.loader.loadModel("models/ground")
         #Reparent the model to render.
         self.environ.reparentTo(self.render)
         #Apply scale and position transforms on the model.
-        self.environ.setScale(0.25, 0.25, 0.25)
-        self.environ.setPos(-8, 42, -1)
+        self.environ.setScale(2, 2, 2)
+        self.environ.setPos(-150, -150, -1)
             
     def createWorld(self, m):
         print "init recieved\n"
