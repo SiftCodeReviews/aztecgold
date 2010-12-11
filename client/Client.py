@@ -22,7 +22,8 @@ class MsgHandler(BrokerCallBack):
             self.client.myPlayerID = request.getObjectID()
             print self.client.myPlayerID
             self.client.myPlayer = self.client.objectDic[self.client.myPlayerID]
-            
+            print "player object type is : " + self.client.myPlayer.oType
+            self.client.taskMgr.add(self.client.cameraTask, "cameraTrackingTask")
         #elif request.getString("mid") == "move":
         #    self.client.moveObject(request)
         #elif request.getString("mid") == "plUpdate":
@@ -48,13 +49,23 @@ class AGClient(ShowBase):
         self.b.setAuthenticationData("test1","test")
         self.b.setServerName("AztecServer")
         self.b._registrarAddress = "127.0.0.1"
-        
+
         self.b.init()
         
 
         #self.fakeInit(self.MH)
 
         #init-login
+
+    def cameraTask(self, task):
+        self.camera.setPos(self.myPlayer.x,
+                           self.myPlayer.y -.3,
+                           30)
+        self.camera.setHpr(0,-80,0)
+        #print self.myPlayer.oType
+        #print self.myPlayer.x
+        #print self.myPlayer.y
+        return Task.cont
 
     def fakeInit(self, msgH):
         m = Message()
@@ -91,7 +102,11 @@ class AGClient(ShowBase):
             o.model = self.loader.loadModel("models/shit")
         elif o.oType == "aztec":
             o.model = self.loader.loadModel("models/coin")
-
+        print objectType
+        print key
+        print o.x
+        print o.y
+        
         self.objectDic[key] = o
         self.objectDic[key].model.reparentTo(self.render)
         self.objectDic[key].model.setScale(0.5, 0.5, 0.5)
@@ -215,7 +230,7 @@ class AGClient(ShowBase):
 
         #non-Static Objects###############################
         numPlayers = m.getInteger("numPlayers")
-        for i in range(numPlayers+1):
+        for i in range(numPlayers):
             tmpstr = "Player" + str(i+1)
             self.createObject(m.getInteger("player" + str(i+1)),
                          "player",
@@ -223,37 +238,36 @@ class AGClient(ShowBase):
                          m.getDouble("y" + tmpstr),
                          m.getDouble("h" + tmpstr))
             
-        '''numAztecs = m.getInteger("numAztecs")
+        numAztecs = m.getInteger("numAztecs")
         for i in range(numAztecs):
-            tmpstr = "Aztec" + str(i)
-            self.createObject(m.getInteger(aztec + str(i)),
+            tmpstr = "Aztec" + str(i+1)
+            print "aztec" + str(i+1)
+            self.createObject(m.getInteger("aztec" + str(i+1)),
                          "aztec",
                          m.getDouble("x" + tmpstr),
                          m.getDouble("y" + tmpstr),
-                         m.getDouble("h" + tmpstr))'''
+                         m.getDouble("h" + tmpstr))
         
-        '''numCoins = message.getInteger("numCoins")
+        numCoins = m.getInteger("numCoins")
         for i in range(numCoins):
-            tmpstr = "Coin" + str(i)
-            self.createObject(m.getInteger(coin + str(i)),
+            tmpstr = "Coin" + str(i+1)
+            self.createObject(m.getInteger("coin" + str(i+1)),
                          "coin",
                          m.getDouble("x" + tmpstr),
                          m.getDouble("y" + tmpstr),
-                         m.getDouble("h" + tmpstr))'''
+                         m.getDouble("h" + tmpstr))
         #static objects####################################
         numTrees = m.getInteger("numTrees")
-        for i in range(numTrees+1):
+        for i in range(numTrees):
             tmpstr = "Tree" + str(i+1)
             self.createTree(m.getDouble("x" + tmpstr),
                             m.getDouble("y" + tmpstr))
         
         numHuts = m.getInteger("numHuts")
-        for i in range(numHuts+1):
+        for i in range(numHuts):
             tmpstr = "Hut" + str(i+1)
             self.createHut(m.getDouble("x" + tmpstr),
-                              m.getDouble("y" + tmpstr))
-        
-        
+                              m.getDouble("y" + tmpstr)) 
 
         self.createChest(m.getDouble("xChest"), m.getDouble("yChest"))
         self.createFort(m.getDouble("xFort"), m.getDouble("yFort"))
