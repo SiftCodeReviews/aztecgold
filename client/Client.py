@@ -45,9 +45,10 @@ class AGClient(ShowBase):
         self.MH.setClient(self)
         self.b.registerCallBack(self.MH)
 
-        self.b.setAuthenticationData("test1","test")
+        self.b.setAuthenticationData("test2","test")
         self.b.setServerName("AztecServer")
-        self.b._registrarAddress = '130.212.3.51'
+        #self.b._registrarAddress = "130.212.3.51"
+        self.b._registrarAddress = "127.0.0.1"
 
         self.b.init()
         
@@ -65,7 +66,7 @@ class AGClient(ShowBase):
                          "player",
                          m.getDouble("x"),
                          m.getDouble("y"),
-                         m.getDouble("h"))
+                         m.getInteger("h"))
     def removePlayer(self, m):
         key = m.getInteger("id")
         if key == self.myPlayerID:
@@ -120,7 +121,7 @@ class AGClient(ShowBase):
         o = self.objectDic[m.getInteger("ID")]
         o.x = m.getDouble("x")
         o.y = m.getDouble("y")
-        o.h = m.getDouble("h")
+        o.h = m.getInteger("h")
         o.model.setPos(o.x,o.y,0)
         
     def changeHeading(self, key):
@@ -144,27 +145,27 @@ class AGClient(ShowBase):
         vmove = vmove - self.down
         hmove = self.right
         hmove = hmove -self.left
-        heading = 1000.0
+        heading = 1000
         if hmove > 0:
-            heading = 90.0
+            heading = 90
         elif hmove < 0:
             heading = 270
         if vmove > 0:
-            heading = 0.0
+            heading = 0
             if hmove > 0:
                 heading = 45
             elif hmove < 0:
                 heading = 315
         elif vmove < 0:
-            heading = 180.0
+            heading = 180
             if hmove > 0:
-                heading = 135.0
+                heading = 135
             elif hmove < 0:
-                heading = 225.0
-        #m = Message()
-        #m.setString("mid", "moveRequest")
-        #m.setDouble("h", heading)
-        #self.b.send(m)
+                heading = 225
+        m = Message()
+        m.setString("mid", "moveRequest")
+        m.setInteger("h", heading)
+        self.b.send(m)
         print heading
     def initControls(self):
         self.up = 0
@@ -198,7 +199,7 @@ class AGClient(ShowBase):
                          "player",
                          m.getDouble("x" + tmpstr),
                          m.getDouble("y" + tmpstr),
-                         m.getDouble("h" + tmpstr))
+                         m.getInteger("h" + tmpstr))
             
         numAztecs = m.getInteger("numAztecs")
         for i in range(numAztecs):
@@ -208,7 +209,7 @@ class AGClient(ShowBase):
                          "aztec",
                          m.getDouble("x" + tmpstr),
                          m.getDouble("y" + tmpstr),
-                         m.getDouble("h" + tmpstr))
+                         m.getInteger("h" + tmpstr))
         
         numCoins = m.getInteger("numCoins")
         for i in range(numCoins):
@@ -217,7 +218,7 @@ class AGClient(ShowBase):
                          "coin",
                          m.getDouble("x" + tmpstr),
                          m.getDouble("y" + tmpstr),
-                         m.getDouble("h" + tmpstr))
+                         m.getInteger("h" + tmpstr))
         #static objects####################################
         numTrees = m.getInteger("numTrees")
         for i in range(numTrees):
@@ -229,7 +230,7 @@ class AGClient(ShowBase):
         for i in range(numHuts):
             tmpstr = "Hut" + str(i+1)
             self.createHut(m.getDouble("x" + tmpstr),
-                              m.getDouble("y" + tmpstr)) 
+                           m.getDouble("y" + tmpstr)) 
 
         self.createChest(m.getDouble("xChest"), m.getDouble("yChest"))
         self.createFort(m.getDouble("xFort"), m.getDouble("yFort"))
