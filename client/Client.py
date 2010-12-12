@@ -1,6 +1,7 @@
 from direct.showbase.ShowBase import ShowBase
 from direct.task import Task
 import thread
+#import direct.TextNode
 import sys
 sys.path.append('broker')
 from Broker import *
@@ -44,6 +45,16 @@ class AGClient(ShowBase):
         self.objectDic = {}
         self.keyboardLock = thread.allocate_lock()
         self.initControls()
+        
+        #tscore = TextNode('score')
+        #tscore.setText("score: ")
+        #self.textNodePath = aspect2d.attachNewNode(text)
+        #self.textNodePath.setScale(0.07)
+
+        #tcoin = TextNode('coins')
+        #tcoin.setText("coins: ")
+        #self.textNodePath = aspect2d.attachNewNode(text)
+        #self.textNodePath.setScale(0.07)
         
         self.b = Broker()
         self.MH = MsgHandler()
