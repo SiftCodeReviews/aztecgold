@@ -11,6 +11,7 @@ import broker.Broker;
 import broker.object.*;
 import broker.service.com.protocol.*;
 
+import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,8 +30,8 @@ public class Server extends BrokerCallBack {
     //static objects' positions (never changes)
     double xFort = 11.0;
     double yFort = 11.0;
-    double xChest = 10.0;
-    double yChest = 10.0;
+    double xChest = -6.0;
+    double yChest = 3.0;
 
     int numTrees = 5;
     {
@@ -48,11 +49,11 @@ public class Server extends BrokerCallBack {
 
     int numHuts = 3;
     {
-        staticMap.put("xHut1", new Double(11.0));
+        staticMap.put("xHut1", new Double(-11.0));
         staticMap.put("yHut1", new Double(-11.0));
-        staticMap.put("xHut2", new Double(12.0));
+        staticMap.put("xHut2", new Double(-12.0));
         staticMap.put("yHut2", new Double(-12.0));
-        staticMap.put("xHut3", new Double(13.0));
+        staticMap.put("xHut3", new Double(-13.0));
         staticMap.put("yHut3", new Double(-13.0));
     }
 
@@ -77,7 +78,6 @@ public class Server extends BrokerCallBack {
         aztecsMap.put("xAztec4", new Double(9.9));
         aztecsMap.put("yAztec4", new Double(9.9));
         aztecsMap.put("hAztec4", new Integer(45));
-
     }
 
     int numCoins = 5;
@@ -140,7 +140,6 @@ public class Server extends BrokerCallBack {
         msg.setInteger("numPlayers", numPlayers);
 
         collection = db.values();
-
         for (Iterator<HashMap> hmIterator = collection.iterator(); hmIterator.hasNext();) {
             HashMap dbValuesMap = hmIterator.next();
             if(!(dbValuesMap.get("id").equals(0))) {
@@ -168,14 +167,69 @@ public class Server extends BrokerCallBack {
             msg.setDouble("xCoin" + i, (Double)(coinsMap.get("xCoin" + i)));
             msg.setDouble("yCoin" + i, (Double)(coinsMap.get("yCoin" + i)));
         }
-
         return msg;
+    }
+
+    public synchronized boolean doCollision(double x, double y, int id) {
+
+        double X, Y;
+        Rectangle playerRectangle = new Rectangle((int)x, (int)y, 1, 1);
+
+        //checking for collision with the Fort
+        X = xFort;
+        Y = yFort;
+        if(playerRectangle.intersects(X, Y, 1.0, 1.0)) {
+            System.out.println("[Server] Collision with the FORT detected!!!");
+            return true;
+        }
+        //checking for collision with the Chest
+        X = xChest;
+        Y = yChest;
+        if(playerRectangle.intersects(X, Y, 1.0, 1.0)) {
+            System.out.println("[Server] Collision with the CHEST detected!!!");
+            //updating score and coins and sending playerStatus back to the player
+            int score = (Integer) db.get(id).get("score");
+            int coins = (Integer) db.get(id).get("coins");
+            db.get(id).put("score", score + coins);
+            db.get(id).put("coins", 0);
+            testMessage(playerStatus(id));  //todo delete debug
+            broker.send(playerStatus(id));
+            return true;
+        }
+
+        //todo check collision with the coins. note: player's movement should not be interrupted
+        //if collision
+//        int coins = (Integer) db.get(id).get("coins");
+//        db.get(id).put("coins", ++coins);
+//        broker.send(playerStatus(id));
+        //todo end
+
+
+        //checking for collision with Trees
+        for (int i = 1; i <= numTrees; i++) {
+            X = (Double)(staticMap.get("xTree" + i));
+            Y = (Double)(staticMap.get("yTree" + i));
+            if(playerRectangle.intersects(X, Y, 1.0, 1.0)) {
+                System.out.println("[Server] Collision with the TREE detected!!!");
+                return true;
+            }
+        }
+        //checking for collision with Huts
+        for (int i = 1; i <= numHuts; i++) {
+            X = (Double)(staticMap.get("xHut" + i));
+            Y = (Double)(staticMap.get("yHut" + i));
+            if(playerRectangle.intersects(X, Y, 1.0, 1.0)) {
+                System.out.println("[Server] Collision with the HUT detected!!!");
+                return true;
+            }
+        }
+        return false;
     }
 
     public synchronized boolean collision(int id, int heading) {
 
-        boolean toReturn = false;
-        db.get(id).put("h", heading);             //putting new h in db
+        boolean flag = false;
+        db.get(id).put("h", heading);             //putting new h in DB
         double x = (Double) db.get(id).get("x");  //getting player's x and y coordinates
         double y = (Double) db.get(id).get("y");
         int h = (Integer) db.get(id).get("h");
@@ -183,72 +237,84 @@ public class Server extends BrokerCallBack {
         switch (h) {
             case 0:
                 y++;
-                //todo check for collision
-                //if(collision == true)
-                // then set flag toReturn to true
-                //else
-                //put new coordinates to the DB
-                db.get(id).put("y", y);
-                System.out.println("y = " + y);
+                if(doCollision(x, y, id))
+                    flag = true;
+                else
+                    db.get(id).put("y", y);
                 break;
             case 45:
                 y++;
                 x++;
-                db.get(id).put("x", x);
-                db.get(id).put("y", y);
-                System.out.println("x = " + x);
-                System.out.println("y = " + y);
+                if(doCollision(x, y, id))
+                    flag = true;
+                else {
+                    db.get(id).put("x", x);
+                    db.get(id).put("y", y);
+                }
                 break;
             case 90:
                 x++;
-                db.get(id).put("x", x);
-                System.out.println("x = " + x);
+                if(doCollision(x, y, id))
+                    flag = true;
+                else
+                    db.get(id).put("x", x);
                 break;
             case 135:
                 x++;
                 y--;
-                db.get(id).put("x", x);
-                db.get(id).put("y", y);
-                System.out.println("x = " + x);
-                System.out.println("y = " + y);
+                if(doCollision(x, y, id))
+                    flag = true;
+                else {
+                    db.get(id).put("x", x);
+                    db.get(id).put("y", y);
+                }
                 break;
             case 180:
                 y--;
-                db.get(id).put("y", y);
-                System.out.println("y = " + y);
+                if(doCollision(x, y, id))
+                    flag = true;
+                else
+                    db.get(id).put("y", y);
                 break;
             case 225:
                 x--;
                 y--;
-                db.get(id).put("x", x);
-                db.get(id).put("y", y);
-                System.out.println("x = " + x);
-                System.out.println("y = " + y);
+                if(doCollision(x, y, id))
+                    flag = true;
+                else {
+                    db.get(id).put("x", x);
+                    db.get(id).put("y", y);
+                }
                 break;
             case 270:
                 x--;
-                db.get(id).put("x", x);
-                System.out.println("x = " + x);
+                if(doCollision(x, y, id))
+                    flag = true;
+                else
+                    db.get(id).put("x", x);
                 break;
             case 315:
                 x--;
                 y++;
-                db.get(id).put("x", x);
-                db.get(id).put("y", y);
-                System.out.println("x = " + x);
-                System.out.println("y = " + y);
+                if(doCollision(x, y, id))
+                    flag = true;
+                else {
+                    db.get(id).put("x", x);
+                    db.get(id).put("y", y);
+                }
                 break;
             case 360:
                 y++;
-                db.get(id).put("y", y);
-                System.out.println("y = " + y);
+                if(doCollision(x, y, id))
+                    flag = true;
+                else
+                    db.get(id).put("y", y);
                 break;
             default:
                 System.out.println("[Server] SWITCH (heading): SOMETHING WENT TOTALLY WRONG!!! :(");
         }
-        return toReturn;
+        return flag;
     }
-
 
     public Message receive(Message request, Message response) {
 
@@ -262,19 +328,16 @@ public class Server extends BrokerCallBack {
                 int id = request.getObjectID();
                 int heading = request.getInteger("h");
 
-
                 System.out.println("[Server] Moving player with id " + id + ", and h = " + heading);
 
                 if(!collision(id, heading)) {
 
-                    testMessage(move(id));  //todo delete debug
+                    testMessage(move(id));    //todo delete debug
                     broker.sendBroadcast(move(id));
-
-
                 }
-                //todo when there is a collision with the coin or chest, send playerStatus() back to that client
-                //playerStatus(request.getObjectID());
-
+                else {
+                    System.out.println("\n\n\n\n\n\n\n\n\n");
+                }
             }
 
         } catch (RuntimeException e) {
@@ -286,13 +349,11 @@ public class Server extends BrokerCallBack {
     public synchronized Message move(int objID) {
 
         Message msg = new Message(objID);
-
         msg.setString("mid", "move");
         msg.setInteger("id", objID);
         msg.setDouble("x", (Double) db.get(objID).get("x"));
         msg.setDouble("y", (Double) db.get(objID).get("y"));
         msg.setInteger("h", (Integer) db.get(objID).get("h"));
-
         return msg;
     }
 
@@ -306,8 +367,8 @@ public class Server extends BrokerCallBack {
         if(!(db.containsKey(id))) {
             System.out.println("[Server] Player with id " + id + " is a new player, registering in DB ...");
             players.put("id", id);
-            players.put("x", 0.1);
-            players.put("y", 0.1);
+            players.put("x", 2.0);
+            players.put("y", 2.0);
             players.put("h", 0);
             players.put("score", 0);
             players.put("coins", 0);
@@ -335,7 +396,6 @@ public class Server extends BrokerCallBack {
 
         //Changing client's id to 0 when client disconnects. note: all [x,y,h] coordinates are still stored in the Map
         (db.get(id)).put("id", 0);
-
         numPlayers--;
 
         testMessage(playerLeft(id)); //todo delete debug
@@ -347,36 +407,29 @@ public class Server extends BrokerCallBack {
     public synchronized Message playerJoined(int id) {
 
         Message msg = new Message(id);
-
         msg.setString("mid", "playerJoined");
         msg.setInteger("id", id);
         msg.setDouble("x", (Double) (db.get(id)).get("x"));
         msg.setDouble("y", (Double) (db.get(id)).get("y"));
         msg.setInteger("h", (Integer) (db.get(id)).get("h"));
-
         return msg;
     }
 
     public Message playerLeft(int id) {
 
         Message msg = new Message(id);
-
         msg.setString("mid", "playerLeft");
         msg.setInteger("id", id);
-
         return msg;
     }
 
     public synchronized Message playerStatus(int id) {
 
         Message msg = new Message(id);
-
         msg.setString("mid", "playerStatus");
         msg.setInteger("score", (Integer)(db.get(id)).get("score"));
         msg.setInteger("coins", (Integer)(db.get(id)).get("coins"));
-
         return msg;
-
     }
 
     public static void main(String args[]) {
@@ -403,10 +456,8 @@ public class Server extends BrokerCallBack {
         System.out.println("------------------------------------------");
         server.objectJoined(13);
         System.out.println("------------------------------------------");
-
         server.db.get(12).put("score", 12345);
         server.db.get(12).put("coins", 987);
-
         server.objectLeft(13);
         System.out.println("------------------------------------------");
         server.objectJoined(11);
@@ -415,44 +466,35 @@ public class Server extends BrokerCallBack {
         System.out.println("------------------------------------------");
         server.objectJoined(10);
         System.out.println("------------------------------------------");
-
-        server.db.get(14).put("x", -1111.1111);
-        server.db.get(14).put("y", -2222.2222);
-        server.db.get(14).put("h", 1000);
-
+        server.db.get(14).put("x", 10.0);
+        server.db.get(14).put("y", -10.0);
+        server.db.get(14).put("h", 180);
         server.objectLeft(14);
         System.out.println("------------------------------------------");
         server.objectJoined(13);
         System.out.println("------------------------------------------");
         server.objectJoined(14);
         System.out.println("------------------------------------------");
-
         server.testMoveRegMsgFromClient(10, 0);
         server.testMoveRegMsgFromClient(11, 45);
         server.testMoveRegMsgFromClient(12, 90);
         server.testMoveRegMsgFromClient(13, 135);
-
         server.testMoveRegMsgFromClient(14, 180);
         server.testMoveRegMsgFromClient(10, 225);
         server.testMoveRegMsgFromClient(11, 270);
         server.testMoveRegMsgFromClient(12, 315);
-
         server.testMoveRegMsgFromClient(13, 360);
-
-
         server.objectLeft(10);
         server.objectLeft(11);
         server.objectLeft(12);
         server.objectLeft(13);
         server.objectLeft(14);
-
         server.objectJoined(14);
         server.objectJoined(13);
         server.objectJoined(12);
         server.objectJoined(11);
         server.objectJoined(10);
 */
-
     }
 
     //todo delete debug
@@ -504,9 +546,9 @@ public class Server extends BrokerCallBack {
     }
 
     public void testMessage(Message msg) {
-        System.out.println("[Server] Response msg. (" + msg.getString("mid") + ") with ["
+        System.out.println("[Server -DEBUG] Response msg. (" + msg.getString("mid") + ") with ["
                 + msg.getFieldNumber() + "] fields has been send to client... ");
-        if(msg.getString("mid").equals("move"))
+        if(msg.getString("mid").equals("move") || msg.getString("mid").equals("playerStatus"))
             System.out.println(msg);
     }
 }
