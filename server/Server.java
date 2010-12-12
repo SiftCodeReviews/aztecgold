@@ -83,24 +83,24 @@ public class Server extends BrokerCallBack {
     int numCoins = 5;
     {
         coinsMap.put("coin1", new Integer(-101));
-        coinsMap.put("xCoin1", new Double(10.1));
-        coinsMap.put("yCoin1", new Double(20.2));
+        coinsMap.put("xCoin1", new Double(10.0));
+        coinsMap.put("yCoin1", new Double(20.0));
 
         coinsMap.put("coin2", new Integer(-102));
-        coinsMap.put("xCoin2", new Double(15.1));
-        coinsMap.put("yCoin2", new Double(25.2));
+        coinsMap.put("xCoin2", new Double(10.0));
+        coinsMap.put("yCoin2", new Double(25.0));
 
         coinsMap.put("coin3", new Integer(-103));
-        coinsMap.put("xCoin3", new Double(19.1));
-        coinsMap.put("yCoin3", new Double(29.2));
+        coinsMap.put("xCoin3", new Double(10.0));
+        coinsMap.put("yCoin3", new Double(30.0));
 
         coinsMap.put("coin4", new Integer(-104));
-        coinsMap.put("xCoin4", new Double(17.1));
-        coinsMap.put("yCoin4", new Double(27.2));
+        coinsMap.put("xCoin4", new Double(10.0));
+        coinsMap.put("yCoin4", new Double(35.0));
 
         coinsMap.put("coin5", new Integer(-105));
-        coinsMap.put("xCoin5", new Double(13.1));
-        coinsMap.put("yCoin5", new Double(23.2));
+        coinsMap.put("xCoin5", new Double(10.0));
+        coinsMap.put("yCoin5", new Double(40.0));
     }
 
     public Server() {
@@ -197,13 +197,26 @@ public class Server extends BrokerCallBack {
             return true;
         }
 
-        //todo check collision with the coins. note: player's movement should not be interrupted
-        //if collision
-//        int coins = (Integer) db.get(id).get("coins");
-//        db.get(id).put("coins", ++coins);
-//        broker.send(playerStatus(id));
-        //todo end
+        for (int i = 1; i <= numCoins; i++) {
+            X = (Double)(coinsMap.get("xCoin" + i));
+            Y = (Double)(coinsMap.get("yCoin" + i));
+            if(playerRectangle.intersects(X, Y, 1.0, 1.0)) {
+                int coins = (Integer) db.get(id).get("coins");   //retrieving last known number of coins
+                int coinID = (Integer) coinsMap.get("coin" + i); //getting an ID of the coin that has been collected
+                db.get(id).put("coins", ++coins);                //putting new number of coins in DB
+                broker.send(playerStatus(id));                   //sending playerStatus()
 
+                testMessage(playerStatus(id));         //todo delete debug
+                testMessage(moveCoin(id, coinID, i));  //todo delete debug
+
+
+                //todo change coin's location
+
+
+                broker.sendBroadcast(moveCoin(id, coinID, i));   //moving coin to a new position
+                return false;
+            }
+        }
 
         //checking for collision with Trees
         for (int i = 1; i <= numTrees; i++) {
@@ -322,7 +335,7 @@ public class Server extends BrokerCallBack {
             System.out.println("[Server] Request msg. with [" + request.getFieldNumber() +
                     "] fields has been received... \n" + request);
 
-            //if player wants to move
+            //if player wants to movePlayer
             if(request.getString("mid").equals("moveReq")) {
 
                 int id = request.getObjectID();
@@ -332,8 +345,8 @@ public class Server extends BrokerCallBack {
 
                 if(!collision(id, heading)) {
 
-                    testMessage(move(id));    //todo delete debug
-                    broker.sendBroadcast(move(id));
+                    testMessage(movePlayer(id));    //todo delete debug
+                    broker.sendBroadcast(movePlayer(id));
                 }
                 else {
                     System.out.println("\n\n\n\n\n\n\n\n\n");
@@ -346,14 +359,24 @@ public class Server extends BrokerCallBack {
         return null;
     }
 
-    public synchronized Message move(int objID) {
+    public synchronized Message movePlayer(int id) {
 
-        Message msg = new Message(objID);
+        Message msg = new Message(id);
+        msg.setString("mid", "move");
+        msg.setInteger("id", id);
+        msg.setDouble("x", (Double) db.get(id).get("x"));
+        msg.setDouble("y", (Double) db.get(id).get("y"));
+        msg.setInteger("h", (Integer) db.get(id).get("h"));
+        return msg;
+    }
+
+    public synchronized Message moveCoin(int id, int objID, int localID) {
+
+        Message msg = new Message(id);
         msg.setString("mid", "move");
         msg.setInteger("id", objID);
-        msg.setDouble("x", (Double) db.get(objID).get("x"));
-        msg.setDouble("y", (Double) db.get(objID).get("y"));
-        msg.setInteger("h", (Integer) db.get(objID).get("h"));
+        msg.setDouble("x", (Double) coinsMap.get("xCoin" + localID));
+        msg.setDouble("y", (Double) coinsMap.get("yCoin" + localID));
         return msg;
     }
 
@@ -548,7 +571,7 @@ public class Server extends BrokerCallBack {
     public void testMessage(Message msg) {
         System.out.println("[Server -DEBUG] Response msg. (" + msg.getString("mid") + ") with ["
                 + msg.getFieldNumber() + "] fields has been send to client... ");
-        if(msg.getString("mid").equals("move") || msg.getString("mid").equals("playerStatus"))
+        if(msg.getString("mid").equals("movePlayer") || msg.getString("mid").equals("playerStatus"))
             System.out.println(msg);
     }
 }
