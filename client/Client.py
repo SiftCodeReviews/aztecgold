@@ -163,7 +163,7 @@ class AGClient(ShowBase):
             elif hmove < 0:
                 heading = 225
         m = Message()
-        m.setString("mid", "moveRequest")
+        m.setString("mid", "moveReq")
         m.setInteger("h", heading)
         self.b.send(m)
         print heading
