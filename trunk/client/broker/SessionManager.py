@@ -22,7 +22,7 @@ class SessionManager(threading.Thread):
     def run(self):
 
         secondsTillAbort = 5
-        rescondsRef=0
+        rescondsRef=time()
         m = Message();
         m._requestID = 0x80000000
         self._broker.send(m,'registrar')
@@ -30,15 +30,18 @@ class SessionManager(threading.Thread):
         # poll for initialized
         while(self._initalized == False):
             sleep(1)
-            rescondsRef += 1
-            if secondsTillAbort == rescondsRef:
+            if secondsTillAbort <= (time()-rescondsRef):
                 errstr = "[SessionManager] Initialization failed in state '" + self._state + "', it couldn't be finished within " + str(secondsTillAbort) + " seconds."
                 raise RuntimeError(errstr)
 
         # manage keep alives
+        rescondsRef=time()
         while(True):
-               sleep(0.5)
-               self._sendKeepAlive()
+            sleep(0.1)
+            if ( (time()-rescondsRef) >= 0.5 ):
+                self._sendKeepAlive()
+                rescondsRef=time()
+                    
 
     
     def _sendKeepAlive(self):
