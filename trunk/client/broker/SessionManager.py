@@ -52,7 +52,7 @@ class SessionManager(threading.Thread):
         self._broker.send(m)
         self._keepAliveComp += 1
 
-        if self._keepAliveComp > 2:
+        if self._keepAliveComp > 5:
             errstr = "[SessionManager] Connection lost to server @ " + self._broker._serverAddress + ":" + str(self._broker._serverPort)
             raise RuntimeError(errstr)
             
