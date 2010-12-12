@@ -23,10 +23,15 @@ class MsgHandler(BrokerCallBack):
             self.client.myPlayer = self.client.objectDic[self.client.myPlayerID]
             print "player object type is : " + self.client.myPlayer.oType
             self.client.taskMgr.add(self.client.cameraTask, "cameraTrackingTask")
+            
         elif request.getString("mid") == "move":
             self.client.moveObject(request)
-        elif request.getString("mid") == "plUpdate":
-            pass
+            
+        elif request.getString("mid") == "playerStatus":
+            self.client.coins = request.getInteger("coins")
+            self.client.score = request.getInteger("score")
+            print "score: " + str(self.client.score)
+            print "coins: " + str(self.client.coins)
         return 0
     
         
@@ -51,14 +56,12 @@ class AGClient(ShowBase):
         self.b._registrarAddress = "127.0.0.1"
 
         self.b.init()
-        
 
-        #self.fakeInit(self.MH)
     def cameraTask(self, task):
         self.camera.setPos(self.myPlayer.x -2.4,
-                           self.myPlayer.y -8,
+                           self.myPlayer.y -25,
                            40)
-        self.camera.setHpr(0,-80,0)
+        self.camera.setHpr(0,-60,0)
         return Task.cont
 
     def addPlayer(self, m):
@@ -75,54 +78,15 @@ class AGClient(ShowBase):
             model = self.objectDic[key].model
             model.removeNode()
             del self.objectDic[key]
-        
-    def createObject(self,key,objectType, xpos,ypos,head):
-        o = Object()        
-        o.x = xpos
-        o.y = ypos
-        o.h = head
-        o.oType = objectType
-        
-        if o.oType == "coin":
-            o.model = self.loader.loadModel("models/coin")  
-        elif o.oType == "player":
-            o.model = self.loader.loadModel("models/coin")
-        elif o.oType == "aztec":
-            o.model = self.loader.loadModel("models/coin")
-        self.objectDic[key] = o
-        self.objectDic[key].model.reparentTo(self.render)
-        self.objectDic[key].model.setPos(o.x,o.y,0)
-        
-    def createTree(self, xpos, ypos):
-        mod = self.loader.loadModel("models/coin")
-        mod.reparentTo(self.render)
-        mod.setScale(0.5,0.5,0.5)
-        mod.setPos(xpos,ypos,0)
-        
-    def createHut(self, xpos, ypos):
-        mod = self.loader.loadModel("models/hut")
-        mod.reparentTo(self.render)
-        mod.setScale(0.5,0.5,0.5)
-        mod.setPos(xpos,ypos,0)
-        
-    def createFort(self, xpos, ypos):
-        mod = self.loader.loadModel("models/coin")
-        mod.reparentTo(self.render)
-        mod.setScale(0.5,0.5,0.5)
-        mod.setPos(xpos,ypos,0)
-        
-    def createChest(self, xpos, ypos):
-        mod = self.loader.loadModel("models/chest")
-        mod.reparentTo(self.render)
-        mod.setScale(0.5,0.5,0.5)
-        mod.setPos(xpos,ypos,0)
-
+            
+    #-----------Movement----------------------#
+    #-----------------------------------------#
     def moveObject(self, m):
-        o = self.objectDic[m.getInteger("ID")]
+        o = self.objectDic[m.getInteger("id")]
         o.x = m.getDouble("x")
         o.y = m.getDouble("y")
         o.h = m.getInteger("h")
-        o.model.setPos(o.x,o.y,0)
+        o.model.setPos(o.x,o.y,1)
         
     def changeHeading(self, key):
         if key == "arrow_up":
@@ -234,6 +198,53 @@ class AGClient(ShowBase):
 
         self.createChest(m.getDouble("xChest"), m.getDouble("yChest"))
         self.createFort(m.getDouble("xFort"), m.getDouble("yFort"))
+
+    #---------Creating Objects---------------------------#
+    #----------------------------------------------------#
+    def createObject(self,key,objectType, xpos,ypos,head):
+        o = Object()        
+        o.x = xpos
+        o.y = ypos
+        o.h = head
+        o.oType = objectType
+        
+        if o.oType == "coin":
+            o.model = self.loader.loadModel("models/coin")  
+        elif o.oType == "player":
+            o.model = self.loader.loadModel("models/coin")
+        elif o.oType == "aztec":
+            o.model = self.loader.loadModel("models/coin")
+        self.objectDic[key] = o
+        self.objectDic[key].model.reparentTo(self.render)
+        self.objectDic[key].model.setPos(o.x,o.y,1)
+        self.objectDic[key].model.setH(o.h)
+        self.objectDic[key].model.setP(90.0)
+        
+    def createTree(self, xpos, ypos):
+        mod = self.loader.loadModel("models/coin")
+        mod.reparentTo(self.render)
+        mod.setScale(0.5,0.5,0.5)
+        mod.setPos(xpos,ypos,0)
+        mod.setP(90.0)
+        
+    def createHut(self, xpos, ypos):
+        mod = self.loader.loadModel("models/hut")
+        mod.reparentTo(self.render)
+        mod.setScale(0.5,0.5,0.5)
+        mod.setPos(xpos,ypos,0)
+        
+    def createFort(self, xpos, ypos):
+        mod = self.loader.loadModel("models/coin")
+        mod.reparentTo(self.render)
+        mod.setScale(0.5,0.5,0.5)
+        mod.setPos(xpos,ypos,0)
+        mod.setP(90.0)
+        
+    def createChest(self, xpos, ypos):
+        mod = self.loader.loadModel("models/chest")
+        mod.reparentTo(self.render)
+        mod.setScale(0.5,0.5,0.5)
+        mod.setPos(xpos,ypos,0)
 
 app = AGClient()
 app.run()
