@@ -25,21 +25,25 @@ class BrokerCallBack:
         # reading a prepared message from the server
         print "[BrokerCallBack] receive() - Message with ", request.getFieldNumber() , " field(s) received"
         #print request.toString()
+      
 
         #just a little test, on every incoming message the client sends out this message
-        response.setString("mid","moveReq")
-        response.setByte("byte -1", -1)
-        response.setByte("byte 1", 1)
-        response.setByte("byte 0", 0)
-        response.setByte("byte 127", 127)
-        response.setInteger("int -1032", -1032)
-        response.setInteger("int 1032", 1032)
-        response.setLong("int -121238", -121238)
-        response.setDouble("double -231.12", -231.12)
-        response.setByte("byte 61", 61)
-        response.setLong("long 1000000", 1000000)
-        response.setShort("short 32400",32400)
-        response.setByte("byte 127", 127)
-        response.setBoolean("bool true", True)
+#        response.setString("mid","moveReq")
+#        response.setByte("byte -1", -1)
+#        response.setByte("byte 1", 1)
+#        response.setByte("byte 0", 0)
+#        response.setByte("byte 127", 127)
+#       response.setInteger("int -1032", -1032)
+#       response.setInteger("int 1032", 1032)
+#       response.setLong("int -121238", -121238)
+        response.setDouble("double 0.1", 0.1)
+        response.setDouble("double 3.1", 3.1)
+        response.setDouble("double -3.1", -3.1)
+        response.setDouble("double -0.1", -0.1)
+#        response.setByte("byte 61", 61)
+#        response.setLong("long 1000000", 1000000)
+#        response.setShort("short 32400",32400)
+#       response.setByte("byte 127", 127)
+#        response.setBoolean("bool true", True)
         
         return response

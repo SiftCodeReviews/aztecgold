@@ -208,10 +208,15 @@ class Message:
                         v1 = ri
                         binp1.append(rf)
 
-
-                binp1.pop()
-                binp1.reverse()
+                if ( len(binp1) > 0 ):
+                        binp1.pop()
+                        binp1.reverse()
+                else:
+                        binp1.append(0)
+             
                 bias = len(binp1)
+
+                #print "binp1 = ", binp1, "; len=", len(binp1)
 
                 #convert part2of the dec (behind the comma)
                 i=0
@@ -251,6 +256,8 @@ class Message:
                 # combine binp3 and binp1
                 binp3.extend(binp1)
                 binp3.extend(binp2)
+
+                #print "binp3=", binp3
 
                 #create binary representation according to IEEE 754
                 i=0
