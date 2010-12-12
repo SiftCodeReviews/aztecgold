@@ -85,22 +85,15 @@ class AGClient(ShowBase):
         if o.oType == "coin":
             o.model = self.loader.loadModel("models/coin")  
         elif o.oType == "player":
-            o.model = self.loader.loadModel("models/shit")
+            o.model = self.loader.loadModel("models/coin")
         elif o.oType == "aztec":
             o.model = self.loader.loadModel("models/coin")
-        print objectType
-        print key
-        print o.x
-        print o.y
-        
         self.objectDic[key] = o
         self.objectDic[key].model.reparentTo(self.render)
         self.objectDic[key].model.setPos(o.x,o.y,0)
         
     def createTree(self, xpos, ypos):
-        mod = self.loader.loadModel("models/shit")
-        texture = loader.loadTexture("models/maps/envir-reeds.png")
-        mod.setTexture(texture)
+        mod = self.loader.loadModel("models/coin")
         mod.reparentTo(self.render)
         mod.setScale(0.5,0.5,0.5)
         mod.setPos(xpos,ypos,0)
