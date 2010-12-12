@@ -60,47 +60,47 @@ public class Server extends BrokerCallBack {
     {
         aztecsMap.put("aztec1", new Integer(-1));
         aztecsMap.put("xAztec1", new Double(1.1));
-        aztecsMap.put("yAztec1", new Double(2.2));
-        aztecsMap.put("hAztec1", new Double(3.3));
+        aztecsMap.put("yAztec1", new Double(1.1));
+        aztecsMap.put("hAztec1", new Integer(180));
 
         aztecsMap.put("aztec2", new Integer(-2));
-        aztecsMap.put("xAztec2", new Double(1.1));
-        aztecsMap.put("yAztec2", new Double(2.2));
-        aztecsMap.put("hAztec2", new Double(3.3));
+        aztecsMap.put("xAztec2", new Double(4.4));
+        aztecsMap.put("yAztec2", new Double(4.4));
+        aztecsMap.put("hAztec2", new Integer(90));
 
         aztecsMap.put("aztec3", new Integer(-3));
-        aztecsMap.put("xAztec3", new Double(1.1));
-        aztecsMap.put("yAztec3", new Double(2.2));
-        aztecsMap.put("hAztec3", new Double(3.3));
+        aztecsMap.put("xAztec3", new Double(5.5));
+        aztecsMap.put("yAztec3", new Double(5.5));
+        aztecsMap.put("hAztec3", new Integer(45));
 
         aztecsMap.put("aztec4", new Integer(-4));
-        aztecsMap.put("xAztec4", new Double(1.1));
-        aztecsMap.put("yAztec4", new Double(2.2));
-        aztecsMap.put("hAztec4", new Double(3.3));
+        aztecsMap.put("xAztec4", new Double(9.9));
+        aztecsMap.put("yAztec4", new Double(9.9));
+        aztecsMap.put("hAztec4", new Integer(45));
 
     }
 
     int numCoins = 5;
     {
         coinsMap.put("coin1", new Integer(-101));
-        coinsMap.put("xCoin1", new Double(1.1));
-        coinsMap.put("yCoin1", new Double(2.2));
+        coinsMap.put("xCoin1", new Double(10.1));
+        coinsMap.put("yCoin1", new Double(20.2));
 
         coinsMap.put("coin2", new Integer(-102));
-        coinsMap.put("xCoin2", new Double(1.1));
-        coinsMap.put("yCoin2", new Double(2.2));
+        coinsMap.put("xCoin2", new Double(15.1));
+        coinsMap.put("yCoin2", new Double(25.2));
 
         coinsMap.put("coin3", new Integer(-103));
-        coinsMap.put("xCoin3", new Double(1.1));
-        coinsMap.put("yCoin3", new Double(2.2));
+        coinsMap.put("xCoin3", new Double(19.1));
+        coinsMap.put("yCoin3", new Double(29.2));
 
         coinsMap.put("coin4", new Integer(-104));
-        coinsMap.put("xCoin4", new Double(1.1));
-        coinsMap.put("yCoin4", new Double(2.2));
+        coinsMap.put("xCoin4", new Double(17.1));
+        coinsMap.put("yCoin4", new Double(27.2));
 
         coinsMap.put("coin5", new Integer(-105));
-        coinsMap.put("xCoin5", new Double(1.1));
-        coinsMap.put("yCoin5", new Double(2.2));
+        coinsMap.put("xCoin5", new Double(13.1));
+        coinsMap.put("yCoin5", new Double(23.2));
     }
 
     public Server() {
@@ -108,7 +108,7 @@ public class Server extends BrokerCallBack {
         db = new HashMap<Integer, HashMap>();
     }
 
-    public Message init(int playerID) {
+    public synchronized Message init(int playerID) {
 
         Message msg = new Message(playerID);
 
@@ -147,7 +147,7 @@ public class Server extends BrokerCallBack {
                 msg.setInteger("player" + player, (Integer)(dbValuesMap.get("id")));
                 msg.setDouble("xPlayer" + player, (Double)(dbValuesMap.get("x")));
                 msg.setDouble("yPlayer" + player, (Double)(dbValuesMap.get("y")));
-                msg.setDouble("hPlayer" + player, (Double)(dbValuesMap.get("h")));
+                msg.setInteger("hPlayer" + player, (Integer)(dbValuesMap.get("h")));
                 player--;
             }
         }
@@ -155,10 +155,10 @@ public class Server extends BrokerCallBack {
         //aztects
         msg.setInteger("numAztecs", numAztecs);
         for (int i = 1; i <= numAztecs; i++) {
-            msg.setInteger("Aztec" + i, i*-1);
+            msg.setInteger("aztec" + i, i*-1);
             msg.setDouble("xAztec" + i, (Double)(aztecsMap.get("xAztec" + i)));
             msg.setDouble("yAztec" + i, (Double)(aztecsMap.get("yAztec" + i)));
-            msg.setDouble("hAztec" + i, (Double)(aztecsMap.get("hAztec" + i)));
+            msg.setInteger("hAztec" + i, (Integer)(aztecsMap.get("hAztec" + i)));
         }
 
         //coins
@@ -172,50 +172,134 @@ public class Server extends BrokerCallBack {
         return msg;
     }
 
-    public boolean collision() {
+    public synchronized boolean collision(int id, int heading) {
 
-        return false;
+        boolean toReturn = false;
+        db.get(id).put("h", heading);             //putting new h in db
+        double x = (Double) db.get(id).get("x");  //getting player's x and y coordinates
+        double y = (Double) db.get(id).get("y");
+        int h = (Integer) db.get(id).get("h");
+
+        switch (h) {
+            case 0:
+                y++;
+                //todo check for collision
+                //if(collision == true)
+                // then set flag toReturn to true
+                //else
+                //put new coordinates to the DB
+                db.get(id).put("y", y);
+                System.out.println("y = " + y);
+                break;
+            case 45:
+                y++;
+                x++;
+                db.get(id).put("x", x);
+                db.get(id).put("y", y);
+                System.out.println("x = " + x);
+                System.out.println("y = " + y);
+                break;
+            case 90:
+                x++;
+                db.get(id).put("x", x);
+                System.out.println("x = " + x);
+                break;
+            case 135:
+                x++;
+                y--;
+                db.get(id).put("x", x);
+                db.get(id).put("y", y);
+                System.out.println("x = " + x);
+                System.out.println("y = " + y);
+                break;
+            case 180:
+                y--;
+                db.get(id).put("y", y);
+                System.out.println("y = " + y);
+                break;
+            case 225:
+                x--;
+                y--;
+                db.get(id).put("x", x);
+                db.get(id).put("y", y);
+                System.out.println("x = " + x);
+                System.out.println("y = " + y);
+                break;
+            case 270:
+                x--;
+                db.get(id).put("x", x);
+                System.out.println("x = " + x);
+                break;
+            case 315:
+                x--;
+                y++;
+                db.get(id).put("x", x);
+                db.get(id).put("y", y);
+                System.out.println("x = " + x);
+                System.out.println("y = " + y);
+                break;
+            case 360:
+                y++;
+                db.get(id).put("y", y);
+                System.out.println("y = " + y);
+                break;
+            default:
+                System.out.println("[Server] SWITCH (heading): SOMETHING WENT TOTALLY WRONG!!! :(");
+        }
+        return toReturn;
     }
 
 
     public Message receive(Message request, Message response) {
 
-        System.out.println("------------------------------------------");
-        System.out.println("[Server] Request msg. with [" + request.getFieldNumber() +
-                "] fields has been received... \n" + request);
-        System.out.println("------------------------------------------");
+        try {
+            System.out.println("[Server] Request msg. with [" + request.getFieldNumber() +
+                    "] fields has been received... \n" + request);
 
-        if(request.getString("mid").equals("moveReq")) {
+            //if player wants to move
+            if(request.getString("mid").equals("moveReq")) {
 
-            System.out.println("[Server] Moving player " + request.getObjectID() +
-                    " to h = " + request.getDouble("h"));
-
-            if(!collision()) {
+                int id = request.getObjectID();
+                int heading = request.getInteger("h");
 
 
-//                //broadcast to all new position of the player
-//                broker.sendBroadcast(response);
-//
-//                return response;
+                System.out.println("[Server] Moving player with id " + id + ", and h = " + heading);
+
+                if(!collision(id, heading)) {
+
+                    testMessage(move(id));  //todo delete debug
+                    broker.sendBroadcast(move(id));
+
+
+                }
                 //todo when there is a collision with the coin or chest, send playerStatus() back to that client
                 //playerStatus(request.getObjectID());
 
-                return null;
             }
-            else {
-                System.out.println("[Server] Player with id " + request.getObjectID() + " CAN NOT longer move...");
-                //todo notifyAll() about the change....NO move!!!
-                return null;
-            }
+
+        } catch (RuntimeException e) {
+            System.out.println("[Server] Exception in receive(): " + e);
         }
-        else
-            return null;
+        return null;
+    }
+
+    public synchronized Message move(int objID) {
+
+        Message msg = new Message(objID);
+
+        msg.setString("mid", "move");
+        msg.setInteger("id", objID);
+        msg.setDouble("x", (Double) db.get(objID).get("x"));
+        msg.setDouble("y", (Double) db.get(objID).get("y"));
+        msg.setInteger("h", (Integer) db.get(objID).get("h"));
+
+        return msg;
     }
 
     public void objectJoined(int id) {
 
         HashMap players = new HashMap();
-        System.out.println("\n\n[Server] objectJoined() ----> id = " + id);
+        System.out.println("[Server] objectJoined() ----> id = " + id);
         numPlayers++;
 
         //putting new player in a hash map, initializing its position
@@ -224,7 +308,7 @@ public class Server extends BrokerCallBack {
             players.put("id", id);
             players.put("x", 0.1);
             players.put("y", 0.1);
-            players.put("h", 0.1);
+            players.put("h", 0);
             players.put("score", 0);
             players.put("coins", 0);
             db.put(id, players);
@@ -238,14 +322,16 @@ public class Server extends BrokerCallBack {
         testMessage(init(id));          //todo delete debug
         testMessage(playerJoined(id));  //todo delete debug
         testHashMap("");                //todo delete debug
+        testMessage(playerStatus(id));  //todo delete debug
 
         broker.send(init(id));   //send initialized world back to the client
+        broker.send(playerStatus(id));   //send the last saved score and coins collected
         broker.sendBroadcast(playerJoined(id));  //broadcast to everyone about new player
     }
 
     public void objectLeft(int id) {
 
-        System.out.println("\n\n[Server] objectLeft() ----> id = " + id);
+        System.out.println("[Server] objectLeft() ----> id = " + id);
 
         //Changing client's id to 0 when client disconnects. note: all [x,y,h] coordinates are still stored in the Map
         (db.get(id)).put("id", 0);
@@ -258,7 +344,7 @@ public class Server extends BrokerCallBack {
         broker.sendBroadcast(playerLeft(id));  //tell everyone that player left
     }
 
-    public Message playerJoined(int id) {
+    public synchronized Message playerJoined(int id) {
 
         Message msg = new Message(id);
 
@@ -266,7 +352,7 @@ public class Server extends BrokerCallBack {
         msg.setInteger("id", id);
         msg.setDouble("x", (Double) (db.get(id)).get("x"));
         msg.setDouble("y", (Double) (db.get(id)).get("y"));
-        msg.setDouble("h", (Double) (db.get(id)).get("h"));
+        msg.setInteger("h", (Integer) (db.get(id)).get("h"));
 
         return msg;
     }
@@ -281,7 +367,7 @@ public class Server extends BrokerCallBack {
         return msg;
     }
 
-    public void playerStatus(int id) {
+    public synchronized Message playerStatus(int id) {
 
         Message msg = new Message(id);
 
@@ -289,7 +375,7 @@ public class Server extends BrokerCallBack {
         msg.setInteger("score", (Integer)(db.get(id)).get("score"));
         msg.setInteger("coins", (Integer)(db.get(id)).get("coins"));
 
-        broker.send(msg);
+        return msg;
 
     }
 
@@ -301,40 +387,85 @@ public class Server extends BrokerCallBack {
         b.setAuthenticationData("AztecServer", "test");
         b.init();
 
-
+        //todo delete all debug statements below
+/*
         Server server = new Server();
+        System.out.println("------------------------------------------");
         server.objectJoined(10);
-
-        server.db.get(10).put("x", 777.7);
-        server.db.get(10).put("y", 888.8);
-        server.db.get(10).put("h", 999.9);
-
+        System.out.println("------------------------------------------");
         server.objectJoined(11);
+        System.out.println("------------------------------------------");
         server.objectJoined(12);
+        System.out.println("------------------------------------------");
         server.objectLeft(10);
+        System.out.println("------------------------------------------");
         server.objectLeft(11);
+        System.out.println("------------------------------------------");
         server.objectJoined(13);
+        System.out.println("------------------------------------------");
 
         server.db.get(12).put("score", 12345);
         server.db.get(12).put("coins", 987);
 
         server.objectLeft(13);
+        System.out.println("------------------------------------------");
         server.objectJoined(11);
+        System.out.println("------------------------------------------");
         server.objectJoined(14);
+        System.out.println("------------------------------------------");
         server.objectJoined(10);
+        System.out.println("------------------------------------------");
 
         server.db.get(14).put("x", -1111.1111);
         server.db.get(14).put("y", -2222.2222);
-        server.db.get(14).put("h", -33333.3333);
+        server.db.get(14).put("h", 1000);
 
         server.objectLeft(14);
+        System.out.println("------------------------------------------");
         server.objectJoined(13);
+        System.out.println("------------------------------------------");
         server.objectJoined(14);
+        System.out.println("------------------------------------------");
+
+        server.testMoveRegMsgFromClient(10, 0);
+        server.testMoveRegMsgFromClient(11, 45);
+        server.testMoveRegMsgFromClient(12, 90);
+        server.testMoveRegMsgFromClient(13, 135);
+
+        server.testMoveRegMsgFromClient(14, 180);
+        server.testMoveRegMsgFromClient(10, 225);
+        server.testMoveRegMsgFromClient(11, 270);
+        server.testMoveRegMsgFromClient(12, 315);
+
+        server.testMoveRegMsgFromClient(13, 360);
+
+
+        server.objectLeft(10);
+        server.objectLeft(11);
+        server.objectLeft(12);
+        server.objectLeft(13);
+        server.objectLeft(14);
+
+        server.objectJoined(14);
+        server.objectJoined(13);
+        server.objectJoined(12);
+        server.objectJoined(11);
+        server.objectJoined(10);
+*/
+
     }
 
+    //todo delete debug
+    // DEBUG: FOR TESTING PURPOSES ONLY 
+    public Message testMoveRegMsgFromClient(int id, int h) {
 
-    //todo delete debug 
-    // DEBUG: FOR TESTING PURPOSES ONLY
+        Message m = new Message(id);
+        m.setString("mid", "moveReq");
+        m.setInteger("h", h);
+        receive(m, null);
+        return m;
+    }
+
     public void testHashMap(String str) {
 
         if (str == "static") {
@@ -348,29 +479,17 @@ public class Server extends BrokerCallBack {
                 System.out.println(key + "\t\t" + value);
             }
         }
-//        else if (str == "players") {
-//            System.out.println("--- Players Hash Map ---");
-//            Iterator iterator = playersMap.keySet().iterator();
-//
-//            while (iterator.hasNext()) {
-//                String key = iterator.next().toString();
-//                String value = playersMap.get(key).toString();
-//
-//                System.out.println(key + "\t\t" + value);
-//            }
-//        }
-//        else if (str == "aztecs") {
-//            System.out.println("--- Aztecs Hash Map ---");
-//            Iterator iterator = aztecsMap.keySet().iterator();
-//
-//            while (iterator.hasNext()) {
-//                String key = iterator.next().toString();
-//                String value = aztecsMap.get(key).toString();
-//
-//                System.out.println(key + "\t\t" + value);
-//            }
-//        }
+        else if (str == "aztecs") {
+            System.out.println("--- Aztecs Hash Map ---");
+            Iterator iterator = aztecsMap.keySet().iterator();
 
+            while (iterator.hasNext()) {
+                String key = iterator.next().toString();
+                String value = aztecsMap.get(key).toString();
+
+                System.out.println(key + "\t\t" + value);
+            }
+        }
         else {
             System.out.println("--- DB Hash Map ---");
             Iterator iterator = db.keySet().iterator();
@@ -385,11 +504,9 @@ public class Server extends BrokerCallBack {
     }
 
     public void testMessage(Message msg) {
-
-        System.out.println("------------------------------------------");
-        System.out.println("[Server] Response msg. with [" + msg.getFieldNumber() +
-                "] fields has been send to client... \n" + msg);
-        System.out.println("------------------------------------------");
-
+        System.out.println("[Server] Response msg. (" + msg.getString("mid") + ") with ["
+                + msg.getFieldNumber() + "] fields has been send to client... ");
+        if(msg.getString("mid").equals("move"))
+            System.out.println(msg);
     }
 }
