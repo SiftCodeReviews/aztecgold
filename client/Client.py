@@ -17,17 +17,16 @@ class MsgHandler(BrokerCallBack):
         if request.getString("mid") == "init":
             self.client.loadTerrain()
             self.client.createWorld(request)
-            #print request.toString()
             
             self.client.myPlayerID = request.getObjectID()
             print self.client.myPlayerID
             self.client.myPlayer = self.client.objectDic[self.client.myPlayerID]
             print "player object type is : " + self.client.myPlayer.oType
             self.client.taskMgr.add(self.client.cameraTask, "cameraTrackingTask")
-        #elif request.getString("mid") == "move":
-        #    self.client.moveObject(request)
-        #elif request.getString("mid") == "plUpdate":
-        #    pass
+        elif request.getString("mid") == "move":
+            self.client.moveObject(request)
+        elif request.getString("mid") == "plUpdate":
+            pass
         return 0
     
         
@@ -54,40 +53,27 @@ class AGClient(ShowBase):
         
 
         #self.fakeInit(self.MH)
-
-        #init-login
-
     def cameraTask(self, task):
-        self.camera.setPos(self.myPlayer.x,
-                           self.myPlayer.y -.3,
-                           30)
+        self.camera.setPos(self.myPlayer.x -2.4,
+                           self.myPlayer.y -8,
+                           40)
         self.camera.setHpr(0,-80,0)
-        #print self.myPlayer.oType
-        #print self.myPlayer.x
-        #print self.myPlayer.y
         return Task.cont
 
-    def fakeInit(self, msgH):
-        m = Message()
-        m.setString("mid", "init")
-
-        m.setInteger("numTrees", 2)
-        m.setDouble("xTree0", -5.0)
-        m.setDouble("yTree0", -5.0)
-        m.setDouble("xTree1", -5.0)
-        m.setDouble("yTree1", -2.0)
-
-        m.setInteger("numHuts", 2)
-        m.setDouble("xHut0", -5.0)
-        m.setDouble("yHut0", -5.0)
-        m.setDouble("xHut1", -5.0)
-        m.setDouble("yHut1", -2.0)
-
-
-        
-
-        dummy = Message()
-        msgH.receive(m, dummy)
+    def addPlayer(self, m):
+        self.createObject(m.getInteger("id"),
+                         "player",
+                         m.getDouble("x"),
+                         m.getDouble("y"),
+                         m.getDouble("h"))
+    def removePlayer(self, m):
+        key = m.getInteger("id")
+        if key == self.myPlayerID:
+            return
+        else:
+            model = self.objectDic[key].model
+            model.removeNode()
+            del self.objectDic[key]
         
     def createObject(self,key,objectType, xpos,ypos,head):
         o = Object()        
@@ -109,7 +95,6 @@ class AGClient(ShowBase):
         
         self.objectDic[key] = o
         self.objectDic[key].model.reparentTo(self.render)
-        self.objectDic[key].model.setScale(0.5, 0.5, 0.5)
         self.objectDic[key].model.setPos(o.x,o.y,0)
         
     def createTree(self, xpos, ypos):
@@ -138,11 +123,8 @@ class AGClient(ShowBase):
         mod.setScale(0.5,0.5,0.5)
         mod.setPos(xpos,ypos,0)
 
-    def movePlayerTask(self, task):
-        #define stuff here
-        pass
     def moveObject(self, m):
-        o = pobjectDic[m.getInteger("ID")]
+        o = self.objectDic[m.getInteger("ID")]
         o.x = m.getDouble("x")
         o.y = m.getDouble("y")
         o.h = m.getDouble("h")
@@ -186,42 +168,29 @@ class AGClient(ShowBase):
                 heading = 135.0
             elif hmove < 0:
                 heading = 225.0
+        #m = Message()
+        #m.setString("mid", "moveRequest")
+        #m.setDouble("h", heading)
+        #self.b.send(m)
         print heading
     def initControls(self):
         self.up = 0
         self.down = 0
         self.left = 0
         self.right = 0
-        self.keyboardLock.acquire()
+
         self.accept("arrow_up", self.changeHeading, ["arrow_up"])
-        self.keyboardLock.release()
-        self.keyboardLock.acquire()
         self.accept("arrow_up-up", self.changeHeading, ["arrow_up-up"])
-        self.keyboardLock.release()
-        self.keyboardLock.acquire()
         self.accept("arrow_down", self.changeHeading, ["arrow_down"])
-        self.keyboardLock.release()
-        self.keyboardLock.acquire()
         self.accept("arrow_down-up", self.changeHeading, ["arrow_down-up"])
-        self.keyboardLock.release()
-        self.keyboardLock.acquire()
         self.accept("arrow_left", self.changeHeading, ["arrow_left"])
-        self.keyboardLock.release()
-        self.keyboardLock.acquire()
         self.accept("arrow_left-up", self.changeHeading, ["arrow_left-up"])
-        self.keyboardLock.release()
-        self.keyboardLock.acquire()
         self.accept("arrow_right", self.changeHeading, ["arrow_right"])
-        self.keyboardLock.release()
-        self.keyboardLock.acquire()
         self.accept("arrow_right-up", self.changeHeading, ["arrow_right-up"])
-        self.keyboardLock.release()
         
     def loadTerrain(self):
         self.environ = self.loader.loadModel("models/ground")
-        #Reparent the model to render.
         self.environ.reparentTo(self.render)
-        #Apply scale and position transforms on the model.
         self.environ.setScale(2, 2, 2)
         self.environ.setPos(-150, -150, -1)
             
