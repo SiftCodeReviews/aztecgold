@@ -47,7 +47,7 @@ class AGClient(ShowBase):
 
         self.b.setAuthenticationData("test1","test")
         self.b.setServerName("AztecServer")
-        self.b._registrarAddress = "127.0.0.1"
+        self.b._registrarAddress = '130.212.3.51'
 
         self.b.init()
         
