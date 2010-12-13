@@ -106,6 +106,7 @@ class AGClient(ShowBase):
         print o.oType
         
     def changeHeading(self, key):
+        if self.init == 0: return
         if key == "arrow_up":
             self.up = 1
         elif key == "arrow_up-up":
