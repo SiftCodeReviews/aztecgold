@@ -20,8 +20,8 @@ public class IndexService extends BrokerServiceWrapper {
 	/**
 	 * Constant registrars ip
 	 */	
-	public static String REGISTRAR_IP	= "127.0.0.1";
-//	public static String REGISTRAR_IP	= "130.212.3.51";
+//	public static String REGISTRAR_IP	= "127.0.0.1";
+	public static String REGISTRAR_IP	= "130.212.3.51";
 	
 	/**
 	 * Constant registrars port

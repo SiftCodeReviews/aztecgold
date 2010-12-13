@@ -151,6 +151,8 @@ public class SessionObject {
 				
 		}
 		
+		System.out.println("-1");
+		
 		return false;
 	
 	}

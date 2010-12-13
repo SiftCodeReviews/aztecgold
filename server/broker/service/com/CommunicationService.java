@@ -68,6 +68,11 @@ public class CommunicationService extends BrokerServiceWrapper {
 	 */
 	private int requestCount = 0;
 	
+	/**
+	 * list stores temporary the joined items until the broker call backs are informed
+	 */
+	private ArrayList<Integer> joinedObjects = new ArrayList<Integer>();
+	
 	
 	/**
 	 * Extended constructor expecting the reference to the IndexService
@@ -197,11 +202,12 @@ public class CommunicationService extends BrokerServiceWrapper {
 				/* after successfull validation of the ticket the client can be registered */
 				this.index.registerSessionObject( new SessionObject(m.getObjectID(), m.getSessionID(), new InetSocketAddress(InetAddress.getByName(m.getString("ip")), m.getInteger("port"))) );
 
-				/* inform callback about new client with objectJoined() */
-				ArrayList<BrokerCallBack> cb = this.index.getBrokerCallBacks();
-				for(int i=0; i < cb.size(); i++) {
-					cb.get(i).objectJoined(m.getObjectID());
+				synchronized(this.joinedObjects) {
+				
+					joinedObjects.add(m.getObjectID());
+				
 				}
+				
 				
 				/* return own ticket in order to provide bidirectional authentication */
 				response.setString("ticket", this.ticket);
@@ -372,6 +378,27 @@ public class CommunicationService extends BrokerServiceWrapper {
 			this.sapUpperLayer(keepAlive);
 			this.keepAliveComp++;
 			
+		}
+		
+		/*
+		 * call objectJoined
+		 */
+		synchronized(this.joinedObjects) {
+			
+			/* inform callback about new client with objectJoined() */
+			ArrayList<BrokerCallBack> cb = this.index.getBrokerCallBacks();
+			for(int i=0; i < cb.size(); i++) {
+				
+				for(int j=0; j < this.joinedObjects.size(); j++) {
+			
+					cb.get(i).objectJoined(this.joinedObjects.get(j).intValue());
+				
+				}
+				
+			}
+		
+			this.joinedObjects.clear();
+					
 		}
 	
 	}
