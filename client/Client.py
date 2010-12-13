@@ -24,7 +24,7 @@ class MsgHandler(BrokerCallBack):
             self.client.myPlayer = self.client.objectDic[self.client.myPlayerID]
             print "player object type is : " + self.client.myPlayer.oType
             self.client.taskMgr.add(self.client.cameraTask, "cameraTrackingTask")
-            isInit = 1
+            sel.client.isInit = 1
         elif request.getString("mid") == "move":
             if isInit == 0: return
             self.client.moveObject(request)
@@ -45,9 +45,9 @@ class AGClient(ShowBase):
     def __init__(self):
         ShowBase.__init__(self)
         self.objectDic = {}
+        self.isInit = 0
         self.keyboardLock = thread.allocate_lock()
         self.initControls()
-        self.isInit = 0
         
         #tscore = TextNode('score')
         #tscore.setText("score: ")
@@ -106,7 +106,7 @@ class AGClient(ShowBase):
         print o.oType
         
     def changeHeading(self, key):
-        if self.init == 0: return
+        if self.isInit == 0: return
         if key == "arrow_up":
             self.up = 1
         elif key == "arrow_up-up":
