@@ -24,13 +24,13 @@ class MsgHandler(BrokerCallBack):
             self.client.myPlayer = self.client.objectDic[self.client.myPlayerID]
             print "player object type is : " + self.client.myPlayer.oType
             self.client.taskMgr.add(self.client.cameraTask, "cameraTrackingTask")
-            sel.client.isInit = 1
+            self.client.isInit = 1
         elif request.getString("mid") == "move":
-            if isInit == 0: return
+            if self.client.isInit == 0: return
             self.client.moveObject(request)
             
         elif request.getString("mid") == "playerStatus":
-            if isInit == 0: return
+            if self.client.isInit == 0: return
             self.client.coins = request.getInteger("coins")
             self.client.score = request.getInteger("score")
             print "score: " + str(self.client.score)
