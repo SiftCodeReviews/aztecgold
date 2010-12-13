@@ -97,7 +97,7 @@ class AGClient(ShowBase):
     #-----------------------------------------#
     def moveObject(self, m):
         oid = m.getInteger("id")
-        if oid in objectDic:
+        if oid in self.objectDic:
             o = self.objectDic[oid]
             o.x = m.getDouble("x")
             o.y = m.getDouble("y")
