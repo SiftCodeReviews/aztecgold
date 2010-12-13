@@ -111,9 +111,6 @@ class AGClient(ShowBase):
             o.y = m.getDouble("y")
             o.h = m.getInteger("h")
             o.model.setPos(o.x,o.y,1)
-            print o.x
-            print o.y
-            print o.oType
         
     def changeHeading(self, key):
         if self.isInit == 0: return
@@ -243,8 +240,8 @@ class AGClient(ShowBase):
             o.model = self.loader.loadModel("models/coin")
         self.objectDic[key] = o
         self.objectDic[key].model.reparentTo(self.render)
-        self.objectDic[key].model.setH(o.h)
-        self.objectDic[key].model.setP(90.0)
+        #self.objectDic[key].model.setH(o.h)
+        #self.objectDic[key].model.setP(90.0)
         self.objectDic[key].model.setPos(o.x,o.y,1)
         
         
@@ -252,7 +249,7 @@ class AGClient(ShowBase):
         mod = self.loader.loadModel("models/coin")
         mod.reparentTo(self.render)
         #mod.setScale(0.5,0.5,0.5)
-        mod.setP(90.0)
+        #mod.setP(90.0)
         mod.setPos(xpos,ypos,1)
         
         
