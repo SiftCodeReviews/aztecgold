@@ -25,6 +25,10 @@ class MsgHandler(BrokerCallBack):
             print "player object type is : " + self.client.myPlayer.oType
             self.client.taskMgr.add(self.client.cameraTask, "cameraTrackingTask")
             self.client.isInit = 1
+        elif request.getString("mid") == "playerJoined":
+            self.client.addPlayer(request)
+        elif request.getString("mid") == "playerLeft":
+            self.client.removePlayer(request)
         elif request.getString("mid") == "move":
             if self.client.isInit == 0: return
             self.client.moveObject(request)
@@ -79,19 +83,23 @@ class AGClient(ShowBase):
         return Task.cont
 
     def addPlayer(self, m):
-        self.createObject(m.getInteger("id"),
+        key = m.getInteger("id")
+        if key == self.myPlayerID:
+            return
+        self.createObject(key,
                          "player",
                          m.getDouble("x"),
                          m.getDouble("y"),
                          m.getInteger("h"))
     def removePlayer(self, m):
         key = m.getInteger("id")
-        if key == self.myPlayerID:
-            return
-        else:
-            model = self.objectDic[key].model
-            model.removeNode()
-            del self.objectDic[key]
+        if key in self.objectDic:
+            if key == self.myPlayerID:
+                return
+            else:
+                model = self.objectDic[key].model
+                model.removeNode()
+                del self.objectDic[key]
             
     #-----------Movement----------------------#
     #-----------------------------------------#
@@ -243,30 +251,30 @@ class AGClient(ShowBase):
     def createTree(self, xpos, ypos):
         mod = self.loader.loadModel("models/coin")
         mod.reparentTo(self.render)
-        mod.setScale(0.5,0.5,0.5)
+        #mod.setScale(0.5,0.5,0.5)
         mod.setP(90.0)
-        mod.setPos(xpos,ypos,0)
+        mod.setPos(xpos,ypos,1)
         
         
     def createHut(self, xpos, ypos):
         mod = self.loader.loadModel("models/hut")
         mod.reparentTo(self.render)
-        mod.setScale(0.5,0.5,0.5)
-        mod.setPos(xpos,ypos,0)
+        #mod.setScale(0.5,0.5,0.5)
+        mod.setPos(xpos,ypos,1)
         
     def createFort(self, xpos, ypos):
         mod = self.loader.loadModel("models/coin")
         mod.reparentTo(self.render)
         mod.setP(90.0)
-        mod.setScale(0.5,0.5,0.5)
-        mod.setPos(xpos,ypos,0)
+        #mod.setScale(0.5,0.5,0.5)
+        mod.setPos(xpos,ypos,1)
         
         
     def createChest(self, xpos, ypos):
         mod = self.loader.loadModel("models/chest")
         mod.reparentTo(self.render)
-        mod.setScale(0.5,0.5,0.5)
-        mod.setPos(xpos,ypos,0)
+        #mod.setScale(0.5,0.5,0.5)
+        mod.setPos(xpos,ypos,1)
 
 app = AGClient()
 app.run()
