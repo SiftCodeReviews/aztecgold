@@ -60,23 +60,23 @@ public class Server extends BrokerCallBack {
     int numAztecs = 4;
     {
         aztecsMap.put("aztec1", new Integer(-1));
-        aztecsMap.put("xAztec1", new Double(1.1));
-        aztecsMap.put("yAztec1", new Double(1.1));
+        aztecsMap.put("xAztec1", new Double(10.0));
+        aztecsMap.put("yAztec1", new Double(-10.0));
         aztecsMap.put("hAztec1", new Integer(180));
 
         aztecsMap.put("aztec2", new Integer(-2));
-        aztecsMap.put("xAztec2", new Double(4.4));
-        aztecsMap.put("yAztec2", new Double(4.4));
+        aztecsMap.put("xAztec2", new Double(20.0));
+        aztecsMap.put("yAztec2", new Double(-20.0));
         aztecsMap.put("hAztec2", new Integer(90));
 
         aztecsMap.put("aztec3", new Integer(-3));
-        aztecsMap.put("xAztec3", new Double(5.5));
-        aztecsMap.put("yAztec3", new Double(5.5));
+        aztecsMap.put("xAztec3", new Double(30.0));
+        aztecsMap.put("yAztec3", new Double(-30.0));
         aztecsMap.put("hAztec3", new Integer(45));
 
         aztecsMap.put("aztec4", new Integer(-4));
-        aztecsMap.put("xAztec4", new Double(9.9));
-        aztecsMap.put("yAztec4", new Double(9.9));
+        aztecsMap.put("xAztec4", new Double(40.0));
+        aztecsMap.put("yAztec4", new Double(-40.0));
         aztecsMap.put("hAztec4", new Integer(45));
     }
 
@@ -192,7 +192,9 @@ public class Server extends BrokerCallBack {
             int coins = (Integer) db.get(id).get("coins");
             db.get(id).put("score", score + coins);
             db.get(id).put("coins", 0);
+
             testMessage(playerStatus(id));  //todo delete debug
+
             broker.send(playerStatus(id));
             return true;
         }
@@ -218,7 +220,27 @@ public class Server extends BrokerCallBack {
                 testHashMap("coins");                  //todo delete debug
 
                 broker.sendBroadcast(moveCoin(id, coinID, i));   //moving coin to a new position and broadcasting...
+                System.out.println("[Server] Collision with the COIN detected!!!");
                 return false;
+            }
+        }
+        //checking the collision with aztects
+        for (int i = 1; i <= numAztecs; i++) {
+            X = (Double)(aztecsMap.get("xAztec" + i));
+            Y = (Double)(aztecsMap.get("yAztec" + i));
+            if(playerRectangle.intersects(X, Y, 1.0, 1.0)) {
+
+                db.get(id).put("coins", 0);      //resetting number of coins and coordinates for the player
+                db.get(id).put("x", 0.0);
+                db.get(id).put("y", 0.0);
+                db.get(id).put("h", 0);
+
+                testMessage(playerStatus(id));         //todo delete debug
+                testHashMap("");                       //todo delete debug
+
+                broker.send(playerStatus(id));
+                System.out.println("[Server] Collision with the AZTEC detected!!!");
+                return true;
             }
         }
         //checking for collision with Trees
@@ -352,6 +374,8 @@ public class Server extends BrokerCallBack {
                     broker.sendBroadcast(movePlayer(id));
                 }
                 else {
+                    //todo
+                    //todo
                     System.out.println("\n\n\n\n\n\n\n\n\n");
                 }
             }
@@ -382,6 +406,32 @@ public class Server extends BrokerCallBack {
         msg.setDouble("y", (Double) coinsMap.get("yCoin" + localID));
         return msg;
     }
+
+    public synchronized Message moveAztec(int id, int objID, int localID) {
+
+        Message msg = new Message(id);
+        msg.setString("mid", "move");
+        msg.setInteger("id", objID);
+
+        double x = (Double) aztecsMap.get("xAztec" + localID);
+        double y = (Double) aztecsMap.get("yAztec" + localID);
+        int h = (Integer) aztecsMap.get("hAztec" + localID);
+
+        x++;
+        y++;
+        h+=45;
+
+        aztecsMap.put("xAztec" + localID, x);
+        aztecsMap.put("yAztec" + localID, y);
+        aztecsMap.put("hAztec" + localID, h);
+
+        msg.setDouble("x", (Double) aztecsMap.get("xAztec" + localID));
+        msg.setDouble("y", (Double) aztecsMap.get("yAztec" + localID));
+        msg.setDouble("h", (Double) aztecsMap.get("hAztec" + localID));
+
+        return msg;
+    }
+
 
     public void objectJoined(int id) {
 
