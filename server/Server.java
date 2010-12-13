@@ -172,7 +172,7 @@ public class Server extends BrokerCallBack {
 
     public synchronized boolean doCollision(double x, double y, int id) {
 
-        double X, Y;
+        double X, Y, randX, randY;
         Rectangle playerRectangle = new Rectangle((int)x, (int)y, 1, 1);
 
         //checking for collision with the Fort
@@ -196,7 +196,7 @@ public class Server extends BrokerCallBack {
             broker.send(playerStatus(id));
             return true;
         }
-
+        //checking for collision with the Coin
         for (int i = 1; i <= numCoins; i++) {
             X = (Double)(coinsMap.get("xCoin" + i));
             Y = (Double)(coinsMap.get("yCoin" + i));
@@ -206,18 +206,21 @@ public class Server extends BrokerCallBack {
                 db.get(id).put("coins", ++coins);                //putting new number of coins in DB
                 broker.send(playerStatus(id));                   //sending playerStatus()
 
+                //randomizing coin's new position [0.0 - 1000.0]
+                randX =  Math.random() * 1000.0;
+                randY =  Math.random() * 1000.0;
+
+                coinsMap.put("xCoin" + i, randX);
+                coinsMap.put("yCoin" + i, randY);
+
                 testMessage(playerStatus(id));         //todo delete debug
                 testMessage(moveCoin(id, coinID, i));  //todo delete debug
+                testHashMap("coins");                  //todo delete debug
 
-
-                //todo change coin's location
-
-
-                broker.sendBroadcast(moveCoin(id, coinID, i));   //moving coin to a new position
+                broker.sendBroadcast(moveCoin(id, coinID, i));   //moving coin to a new position and broadcasting...
                 return false;
             }
         }
-
         //checking for collision with Trees
         for (int i = 1; i <= numTrees; i++) {
             X = (Double)(staticMap.get("xTree" + i));
@@ -462,75 +465,10 @@ public class Server extends BrokerCallBack {
         b.registerCallBack(new Server());
         b.setAuthenticationData("AztecServer", "test");
         b.init();
-
-        //todo delete all debug statements below
-/*
-        Server server = new Server();
-        System.out.println("------------------------------------------");
-        server.objectJoined(10);
-        System.out.println("------------------------------------------");
-        server.objectJoined(11);
-        System.out.println("------------------------------------------");
-        server.objectJoined(12);
-        System.out.println("------------------------------------------");
-        server.objectLeft(10);
-        System.out.println("------------------------------------------");
-        server.objectLeft(11);
-        System.out.println("------------------------------------------");
-        server.objectJoined(13);
-        System.out.println("------------------------------------------");
-        server.db.get(12).put("score", 12345);
-        server.db.get(12).put("coins", 987);
-        server.objectLeft(13);
-        System.out.println("------------------------------------------");
-        server.objectJoined(11);
-        System.out.println("------------------------------------------");
-        server.objectJoined(14);
-        System.out.println("------------------------------------------");
-        server.objectJoined(10);
-        System.out.println("------------------------------------------");
-        server.db.get(14).put("x", 10.0);
-        server.db.get(14).put("y", -10.0);
-        server.db.get(14).put("h", 180);
-        server.objectLeft(14);
-        System.out.println("------------------------------------------");
-        server.objectJoined(13);
-        System.out.println("------------------------------------------");
-        server.objectJoined(14);
-        System.out.println("------------------------------------------");
-        server.testMoveRegMsgFromClient(10, 0);
-        server.testMoveRegMsgFromClient(11, 45);
-        server.testMoveRegMsgFromClient(12, 90);
-        server.testMoveRegMsgFromClient(13, 135);
-        server.testMoveRegMsgFromClient(14, 180);
-        server.testMoveRegMsgFromClient(10, 225);
-        server.testMoveRegMsgFromClient(11, 270);
-        server.testMoveRegMsgFromClient(12, 315);
-        server.testMoveRegMsgFromClient(13, 360);
-        server.objectLeft(10);
-        server.objectLeft(11);
-        server.objectLeft(12);
-        server.objectLeft(13);
-        server.objectLeft(14);
-        server.objectJoined(14);
-        server.objectJoined(13);
-        server.objectJoined(12);
-        server.objectJoined(11);
-        server.objectJoined(10);
-*/
     }
 
     //todo delete debug
     // DEBUG: FOR TESTING PURPOSES ONLY 
-    public Message testMoveRegMsgFromClient(int id, int h) {
-
-        Message m = new Message(id);
-        m.setString("mid", "moveReq");
-        m.setInteger("h", h);
-        receive(m, null);
-        return m;
-    }
-
     public void testHashMap(String str) {
 
         if (str == "static") {
@@ -551,6 +489,17 @@ public class Server extends BrokerCallBack {
             while (iterator.hasNext()) {
                 String key = iterator.next().toString();
                 String value = aztecsMap.get(key).toString();
+
+                System.out.println(key + "\t\t" + value);
+            }
+        }
+        else if (str == "coins") {
+            System.out.println("--- Coins Hash Map ---");
+            Iterator iterator = coinsMap.keySet().iterator();
+
+            while (iterator.hasNext()) {
+                String key = iterator.next().toString();
+                String value = coinsMap.get(key).toString();
 
                 System.out.println(key + "\t\t" + value);
             }
