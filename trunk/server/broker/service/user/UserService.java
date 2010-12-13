@@ -35,6 +35,14 @@ public class UserService extends BrokerServiceWrapper {
 		// TEMPORARY static user
 		this.userList.add(new UserData("test1","test", 80));
 		this.userList.add(new UserData("test2","test", 82));
+		this.userList.add(new UserData("test3","test", 83));
+		this.userList.add(new UserData("test4","test", 84));
+		this.userList.add(new UserData("test5","test", 85));
+		this.userList.add(new UserData("test6","test", 86));
+		this.userList.add(new UserData("test7","test", 87));
+		this.userList.add(new UserData("test8","test", 88));
+		this.userList.add(new UserData("test9","test", 89));
+		this.userList.add(new UserData("test10","test", 90));		
 		this.userList.add(new UserData("AztecServer","test", 81, true));
 		
 	}
