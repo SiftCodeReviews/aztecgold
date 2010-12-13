@@ -96,14 +96,16 @@ class AGClient(ShowBase):
     #-----------Movement----------------------#
     #-----------------------------------------#
     def moveObject(self, m):
-        o = self.objectDic[m.getInteger("id")]
-        o.x = m.getDouble("x")
-        o.y = m.getDouble("y")
-        o.h = m.getInteger("h")
-        o.model.setPos(o.x,o.y,1)
-        print o.x
-        print o.y
-        print o.oType
+        oid = m.getInteger("id")
+        if oid in objectDic:
+            o = self.objectDic[oid]
+            o.x = m.getDouble("x")
+            o.y = m.getDouble("y")
+            o.h = m.getInteger("h")
+            o.model.setPos(o.x,o.y,1)
+            print o.x
+            print o.y
+            print o.oType
         
     def changeHeading(self, key):
         if self.isInit == 0: return
