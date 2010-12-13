@@ -21,7 +21,7 @@ class SessionManager(threading.Thread):
 
     def run(self):
 
-        secondsTillAbort = 5
+        secondsTillAbort = 10
         rescondsRef=time()
         m = Message();
         m._requestID = 0x80000000
@@ -38,7 +38,7 @@ class SessionManager(threading.Thread):
         rescondsRef=time()
         while(True):
             sleep(0.1)
-            if ( (time()-rescondsRef) >= 0.5 ):
+            if ( (time()-rescondsRef) >= 1 ):
                 self._sendKeepAlive()
                 rescondsRef=time()
                     
@@ -52,7 +52,7 @@ class SessionManager(threading.Thread):
         self._broker.send(m)
         self._keepAliveComp += 1
 
-        if self._keepAliveComp > 5:
+        if self._keepAliveComp > 10:
             errstr = "[SessionManager] Connection lost to server @ " + self._broker._serverAddress + ":" + str(self._broker._serverPort)
             raise RuntimeError(errstr)
             
