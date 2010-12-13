@@ -37,7 +37,7 @@ public class SessionObject {
 	/**
 	 * timestamp of the last session update
 	 */
-	private long timestamp = 0;
+	private long timestamp = -1;
 	
 	/**
 	 * The assigned object id, assigment will be done through UserService
@@ -57,7 +57,7 @@ public class SessionObject {
 	
 		this.challenge	= (long)(Math.random()*Long.MAX_VALUE); 
 		this.sessionID	= (int)(Math.random()*Integer.MAX_VALUE); 
-		this.touch();
+		//this.touch();
 			
 	}
 	
@@ -70,7 +70,7 @@ public class SessionObject {
 		this.objectID	= objectID;
 		this.socket		= isa;
 		this.challenge	= (long)(Math.random()*Long.MAX_VALUE); 
-		this.touch();
+		//this.touch();
 			
 	}
 	
@@ -83,7 +83,7 @@ public class SessionObject {
 		this.socket		= isa;
 		this.challenge	= (long)(Math.random()*Long.MAX_VALUE); 
 		this.sessionID	= (int)(Math.random()*Integer.MAX_VALUE); 
-		this.touch();
+		//this.touch();
 			
 	}
 
@@ -97,7 +97,7 @@ public class SessionObject {
 		this.challenge	= (long)(Math.random()*Long.MAX_VALUE); 
 		this.socket		= isa;
 		this.sessionID	= (int)(Math.random()*Integer.MAX_VALUE); 
-		this.touch();
+		//this.touch();
 			
 	}
 	
@@ -141,11 +141,17 @@ public class SessionObject {
 	public boolean isTimedout(int milliseconds) {
 		
 		//System.out.println(((System.nanoTime()-this.timestamp)/1000000.) + " > " +milliseconds );
+		
+		if ( this.timestamp > -1 ) {
 			
-		if ( ((System.nanoTime()-this.timestamp)/1000000.) > milliseconds )
-			return true;
-		else
-			return false;
+			if ( ((System.nanoTime()-this.timestamp)/1000000.) > milliseconds )
+				return true;
+			else
+				return false;
+				
+		}
+		
+		return false;
 	
 	}
 	

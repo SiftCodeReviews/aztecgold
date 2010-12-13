@@ -333,7 +333,7 @@ public class CommunicationService extends BrokerServiceWrapper {
 			if ( tso.getObjectID() != this.objectID ) {
 				
 				/* if timeouted remove session */
-				if ( tso.isTimedout(3000) ) {
+				if ( tso.isTimedout(6000) ) {
 				
 					/* inform callback about new client with objectJoined() */
 					ArrayList<BrokerCallBack> cb = this.index.getBrokerCallBacks();
