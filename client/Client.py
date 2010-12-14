@@ -61,8 +61,8 @@ class AGClient(ShowBase):
 
         self.b.setAuthenticationData("test4","test")
         self.b.setServerName("AztecServer")
-        self.b._registrarAddress = "130.212.3.51"
-        #self.b._registrarAddress = "127.0.0.1"
+        #self.b._registrarAddress = "130.212.3.51"
+        self.b._registrarAddress = "127.0.0.1"
 
         self.b.init()
 
@@ -101,6 +101,7 @@ class AGClient(ShowBase):
             o.x = m.getDouble("x")
             o.y = m.getDouble("y")
             o.h = m.getInteger("h")
+            o.model.setH(o.model, o.h)
             o.model.setPos(o.x,o.y,1)
             
     def changeHeading(self, key):
@@ -227,19 +228,17 @@ class AGClient(ShowBase):
         if o.oType == "coin":
             o.model = self.loader.loadModel("models/coin")  
         elif o.oType == "player":
-            o.model = self.loader.loadModel("models/hut")
+            o.model = self.loader.loadModel("models/fplayer")
         elif o.oType == "aztec":
-            o.model = self.loader.loadModel("models/coin")
+            o.model = self.loader.loadModel("models/aztec")
         self.objectDic[key] = o
         o.model.reparentTo(self.render)
-        #o.model.setP(o.model,90.0)
         o.model.setH(o.model,90)
         o.model.setPos(o.x,o.y,1)
         
     def createTree(self, xpos, ypos):
-        mod = self.loader.loadModel("models/coin")
+        mod = self.loader.loadModel("models/tree")
         mod.reparentTo(self.render)
-        #mod.setP(mod,90.0)
         mod.setPos(xpos +1,ypos,1)
         
         
