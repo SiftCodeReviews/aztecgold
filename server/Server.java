@@ -16,7 +16,7 @@ import java.util.*;
 
 public class Server extends BrokerCallBack {
     private static Server instance = new Server();
-    private static final double CHASE_DISTANCE = 8;
+    private static final double CHASE_DISTANCE = 11;
 
     public static Server getInstance() {
         return instance;
@@ -29,7 +29,7 @@ public class Server extends BrokerCallBack {
     Map<Integer, Player> players = new HashMap<Integer, Player>();
 
     int numPlayers = 0;
-    int numTrees = 5;
+    int numTrees = 25;
     int numHuts = 5;
     int numAztecs = 4;
     int numCoins = 50;
@@ -53,22 +53,42 @@ public class Server extends BrokerCallBack {
     private void initializeStaticObjects() {
         staticObjects.add(new Tree(1, 1, -1));
         staticObjects.add(new Tree(2, 3, -3));
-        staticObjects.add(new Tree(3, 5, -5));
-        staticObjects.add(new Tree(4, 8, -8));
-        staticObjects.add(new Tree(5, 15, -15));
-
+        staticObjects.add(new Tree(3, 5, -35));
+        staticObjects.add(new Tree(4, -8, -28));
+        staticObjects.add(new Tree(5, -15, -83));
+        staticObjects.add(new Tree(6, -33, -14));
+        staticObjects.add(new Tree(7, -33, -41));
+        staticObjects.add(new Tree(8, 25, -5));
+        staticObjects.add(new Tree(9, 38, -8));
+        staticObjects.add(new Tree(10, 55, -15));
+        staticObjects.add(new Tree(11, 41, -18));
+        staticObjects.add(new Tree(12, 43, -31));
+        staticObjects.add(new Tree(13, 35, -59));
+        staticObjects.add(new Tree(14, 38, -84));
+        staticObjects.add(new Tree(15, 15, -15));
+        staticObjects.add(new Tree(16, 52, -19));
+        staticObjects.add(new Tree(17, 37, -24));
+        staticObjects.add(new Tree(18, 100, -51));
+        staticObjects.add(new Tree(19, 85, -8));
+        staticObjects.add(new Tree(20, 115, -15));
+        staticObjects.add(new Tree(21, 120, -13));
+        staticObjects.add(new Tree(22, 34, -3));
+        staticObjects.add(new Tree(23, 52, -5));
+        staticObjects.add(new Tree(24, 89, -74));
+        staticObjects.add(new Tree(25, 64, -30));
+        
         staticObjects.add(new Hut(1, -40, -40));
         staticObjects.add(new Hut(2, -15, -15));
         staticObjects.add(new Hut(3, -30, -30));
         staticObjects.add(new Hut(4, 0, -35));
         staticObjects.add(new Hut(5, 0, -20));
 
-        staticObjects.add(new Fort(75, 75));
-        staticObjects.add(new Chest(0, 20));
+        staticObjects.add(new Fort(0, 70));
+        staticObjects.add(new Chest(0, 50));
 
-        staticObjects.add(new Coin(-101, 1, Math.random() * 100, Math.random() * 100));
-        staticObjects.add(new Coin(-102, 2, Math.random() * 100, Math.random() * 100));
-        staticObjects.add(new Coin(-103, 3, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-101, 1, Math.random() * 10, Math.random() * 10));
+        staticObjects.add(new Coin(-102, 2, Math.random() * 10, Math.random() * 10));
+        staticObjects.add(new Coin(-103, 3, Math.random() * 10, Math.random() * 10));
         staticObjects.add(new Coin(-104, 4, Math.random() * 100, Math.random() * 100));
         staticObjects.add(new Coin(-105, 5, Math.random() * 100, Math.random() * 100));
         staticObjects.add(new Coin(-106, 6, Math.random() * 100, Math.random() * 100));
@@ -186,7 +206,7 @@ public class Server extends BrokerCallBack {
         //checking the collision with aztects
         for (Aztec aztec : aztecs) {
             if (playerRectangle.intersects(aztec.getRectangle())) {
-                player.move(5, 20);
+                player.move(5, 50);
                 player.setHeading(0);
                 player.removeAllCoins();
                 broker.send(playerStatus(id));
@@ -243,7 +263,6 @@ public class Server extends BrokerCallBack {
         msg.setInteger("id", coin.getId());
         msg.setDouble("x", coin.getX());
         msg.setDouble("y", coin.getY());
-        msg.setInteger("h", 90);
 
         return msg;
     }
@@ -265,7 +284,7 @@ public class Server extends BrokerCallBack {
 
         Player player = players.get(id);
         if (player == null) {
-            player = new Player(id, 2, 2);
+            player = new Player(id, 5, 50);
             players.put(id, player);
         } else {
             player.setOnline(true);
