@@ -81,17 +81,20 @@ class Broker:
     """
     def send(self,message,destination='server'):
 
-        message._sessionID = self._sessionID
+        if isinstance(message, Message):
+            message._sessionID = self._sessionID
 
-        if (message._objectID == 0):
-            message._objectID = self._objectID
+            if (message._objectID == 0):
+                message._objectID = self._objectID
 
-        if message._requestID == 0:
-            self._requestID += 1
-            self._requestID = self._requestID&0x7FFFFFFF
-            message._requestID = self._requestID
+            if message._requestID == 0:
+                self._requestID += 1
+                self._requestID = self._requestID&0x7FFFFFFF
+                message._requestID = self._requestID
 
-        if destination == 'server' and self._serverAddress != "":
-            self._socket.sendto(message.encodeBER(), (self._serverAddress,self._serverPort))
+            if destination == 'server' and self._serverAddress != "":
+                self._socket.sendto(message.encodeBER(), (self._serverAddress,self._serverPort))
+            else:
+                self._socket.sendto(message.encodeBER(), (self._registrarAddress,self._registrarPort))
         else:
-            self._socket.sendto(message.encodeBER(), (self._registrarAddress,self._registrarPort))
+            print "[Broker] send() - message is not of type Message."
