@@ -32,7 +32,7 @@ public class Server extends BrokerCallBack {
     int numTrees = 25;
     int numHuts = 5;
     int numAztecs = 4;
-    int numCoins = 50;
+    int numCoins = 40;
 
     private Server() {
         initializeStaticObjects();
@@ -126,16 +126,6 @@ public class Server extends BrokerCallBack {
         staticObjects.add(new Coin(-138, 38, Math.random() * 100, Math.random() * 100));
         staticObjects.add(new Coin(-139, 39, Math.random() * 100, Math.random() * 100));
         staticObjects.add(new Coin(-140, 40, Math.random() * 100, Math.random() * 100));
-        staticObjects.add(new Coin(-141, 41, Math.random() * 100, Math.random() * 100));
-        staticObjects.add(new Coin(-142, 42, Math.random() * 100, Math.random() * 100));
-        staticObjects.add(new Coin(-143, 43, Math.random() * 100, Math.random() * 100));
-        staticObjects.add(new Coin(-144, 44, Math.random() * 100, Math.random() * 100));
-        staticObjects.add(new Coin(-145, 45, Math.random() * 100, Math.random() * 100));
-        staticObjects.add(new Coin(-146, 46, Math.random() * 100, Math.random() * 100));
-        staticObjects.add(new Coin(-147, 47, Math.random() * 100, Math.random() * 100));
-        staticObjects.add(new Coin(-148, 48, Math.random() * 100, Math.random() * 100));
-        staticObjects.add(new Coin(-149, 49, Math.random() * 100, Math.random() * 100));
-        staticObjects.add(new Coin(-150, 50, Math.random() * 100, Math.random() * 100));
     }
 
     public synchronized Message initializeStage(int playerID) {
