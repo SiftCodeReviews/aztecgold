@@ -101,7 +101,7 @@ class AGClient(ShowBase):
             o.x = m.getDouble("x")
             o.y = m.getDouble("y")
             o.h = m.getInteger("h")
-            o.model.setH(o.model, o.h)
+            o.model.setH(0.0 - o.h)
             o.model.setPos(o.x,o.y,1)
             
     def changeHeading(self, key):
