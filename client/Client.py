@@ -112,6 +112,8 @@ class AGClient(ShowBase):
             o.h = m.getInteger("h")
             o.model.setH(0.0 - o.h)
             o.model.setPos(o.x,o.y,1)
+            print o.x
+            print o.y
             
     def changeHeading(self, key):
         if self.isInit == 0: return
@@ -242,6 +244,7 @@ class AGClient(ShowBase):
             o.model = self.loader.loadModel("models/aztec")
         self.objectDic[key] = o
         o.model.reparentTo(self.render)
+        o.model.setScale(0.5, 0.5, 0.5)
         o.model.setH(o.model,90)
         o.model.setPos(o.x,o.y,1)
         
@@ -254,6 +257,7 @@ class AGClient(ShowBase):
     def createHut(self, xpos, ypos):
         mod = self.loader.loadModel("models/hut")
         mod.reparentTo(self.render)
+        mod.setScale(2.0, 2.0, 2.0)
         mod.setPos(xpos,ypos-2,1)
         
     def createFort(self, xpos, ypos):
