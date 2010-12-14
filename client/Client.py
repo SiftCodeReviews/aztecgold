@@ -35,10 +35,9 @@ class MsgHandler(BrokerCallBack):
             
         elif request.getString("mid") == "playerStatus":
             if self.client.isInit == 0: return
-            self.client.coins = request.getInteger("coins")
-            self.client.score = request.getInteger("score")
-            print "score: " + str(self.client.score)
-            print "coins: " + str(self.client.coins)
+            #self.client.coinText.setText(str(request.getInteger("score")))
+            #self.client.scoreText.setText(str(request.getInteger("score")))
+            
         return 0
     
         
@@ -52,23 +51,15 @@ class AGClient(ShowBase):
         self.isInit = 0
         self.keyboardLock = thread.allocate_lock()
         self.initControls()
-        
-        #tscore = TextNode('score')
-        #tscore.setText("score: ")
-        #self.textNodePath = aspect2d.attachNewNode(text)
-        #self.textNodePath.setScale(0.07)
-
-        #tcoin = TextNode('coins')
-        #tcoin.setText("coins: ")
-        #self.textNodePath = aspect2d.attachNewNode(text)
-        #self.textNodePath.setScale(0.07)
+        #self.scoreText = TextNode('score text')
+        #self.coinText = TextNode('coin text')
         
         self.b = Broker()
         self.MH = MsgHandler()
         self.MH.setClient(self)
         self.b.registerCallBack(self.MH)
 
-        self.b.setAuthenticationData("test1","test")
+        self.b.setAuthenticationData("test4","test")
         self.b.setServerName("AztecServer")
         self.b._registrarAddress = "130.212.3.51"
         #self.b._registrarAddress = "127.0.0.1"
@@ -76,7 +67,7 @@ class AGClient(ShowBase):
         self.b.init()
 
     def cameraTask(self, task):
-        self.camera.setPos(self.myPlayer.x -2.4,
+        self.camera.setPos(self.myPlayer.x ,
                            self.myPlayer.y -25,
                            40)
         self.camera.setHpr(0,-60,0)
@@ -111,7 +102,7 @@ class AGClient(ShowBase):
             o.y = m.getDouble("y")
             o.h = m.getInteger("h")
             o.model.setPos(o.x,o.y,1)
-        
+            
     def changeHeading(self, key):
         if self.isInit == 0: return
         if key == "arrow_up":
@@ -222,12 +213,13 @@ class AGClient(ShowBase):
 
         self.createChest(m.getDouble("xChest"), m.getDouble("yChest"))
         self.createFort(m.getDouble("xFort"), m.getDouble("yFort"))
+        
 
     #---------Creating Objects---------------------------#
     #----------------------------------------------------#
     def createObject(self,key,objectType, xpos,ypos,head):
         o = Object()        
-        o.x = xpos
+        o.x = xpos + 1
         o.y = ypos
         o.h = head
         o.oType = objectType
@@ -235,42 +227,36 @@ class AGClient(ShowBase):
         if o.oType == "coin":
             o.model = self.loader.loadModel("models/coin")  
         elif o.oType == "player":
-            o.model = self.loader.loadModel("models/coin")
+            o.model = self.loader.loadModel("models/hut")
         elif o.oType == "aztec":
             o.model = self.loader.loadModel("models/coin")
         self.objectDic[key] = o
-        self.objectDic[key].model.reparentTo(self.render)
-        #self.objectDic[key].model.setH(o.h)
-        #self.objectDic[key].model.setP(90.0)
-        self.objectDic[key].model.setPos(o.x,o.y,1)
-        
+        o.model.reparentTo(self.render)
+        #o.model.setP(o.model,90.0)
+        o.model.setH(o.model,90)
+        o.model.setPos(o.x,o.y,1)
         
     def createTree(self, xpos, ypos):
         mod = self.loader.loadModel("models/coin")
         mod.reparentTo(self.render)
-        #mod.setScale(0.5,0.5,0.5)
-        #mod.setP(90.0)
-        mod.setPos(xpos,ypos,1)
+        #mod.setP(mod,90.0)
+        mod.setPos(xpos +1,ypos,1)
         
         
     def createHut(self, xpos, ypos):
         mod = self.loader.loadModel("models/hut")
         mod.reparentTo(self.render)
-        #mod.setScale(0.5,0.5,0.5)
         mod.setPos(xpos,ypos,1)
         
     def createFort(self, xpos, ypos):
-        mod = self.loader.loadModel("models/coin")
+        mod = self.loader.loadModel("models/fort")
         mod.reparentTo(self.render)
-        mod.setP(90.0)
-        #mod.setScale(0.5,0.5,0.5)
         mod.setPos(xpos,ypos,1)
         
         
     def createChest(self, xpos, ypos):
         mod = self.loader.loadModel("models/chest")
         mod.reparentTo(self.render)
-        #mod.setScale(0.5,0.5,0.5)
         mod.setPos(xpos,ypos,1)
 
 app = AGClient()
