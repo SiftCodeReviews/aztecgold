@@ -1,7 +1,7 @@
 from direct.showbase.ShowBase import ShowBase
 from direct.task import Task
 import thread
-#import direct.TextNode
+from direct.gui.OnscreenText import OnscreenText
 import sys
 sys.path.append('broker')
 from Broker import *
@@ -35,9 +35,14 @@ class MsgHandler(BrokerCallBack):
             
         elif request.getString("mid") == "playerStatus":
             if self.client.isInit == 0: return
-            #self.client.coinText.setText(str(request.getInteger("score")))
-            #self.client.scoreText.setText(str(request.getInteger("score")))
-            
+            self.client.scoreText.destroy()
+            self.client.scoreText = OnscreenText(text = "Score: " + str(request.getInteger("score")), 
+                                  pos = (-0.9, -0.85),
+                                  scale = .15)
+            self.client.coinText.destroy()
+            self.client.coinText = OnscreenText(text = "Coins: " + str(request.getInteger("coins")), 
+                                  pos = (-0.88, -0.95),
+                                  scale = .15)    
         return 0
     
         
@@ -51,8 +56,12 @@ class AGClient(ShowBase):
         self.isInit = 0
         self.keyboardLock = thread.allocate_lock()
         self.initControls()
-        #self.scoreText = TextNode('score text')
-        #self.coinText = TextNode('coin text')
+        self.scoreText = OnscreenText(text = "Score: ", 
+                                  pos = (-0.9, -0.85),
+                                  scale = .15)
+        self.coinText = OnscreenText(text = "Coin: ", 
+                                  pos = (-0.88, -0.95),
+                                  scale = .15)
         
         self.b = Broker()
         self.MH = MsgHandler()
