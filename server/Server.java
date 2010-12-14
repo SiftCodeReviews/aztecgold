@@ -32,7 +32,7 @@ public class Server extends BrokerCallBack {
     int numTrees = 5;
     int numHuts = 5;
     int numAztecs = 4;
-    int numCoins = 10;
+    int numCoins = 50;
 
     private Server() {
         initializeStaticObjects();
@@ -63,19 +63,59 @@ public class Server extends BrokerCallBack {
         staticObjects.add(new Hut(4, 0, -35));
         staticObjects.add(new Hut(5, 0, -20));
 
-        staticObjects.add(new Fort(11, 11));
-        staticObjects.add(new Chest(-6, 3));
+        staticObjects.add(new Fort(75, 75));
+        staticObjects.add(new Chest(0, 20));
 
-        staticObjects.add(new Coin(-101, 1, 10, 20));
-        staticObjects.add(new Coin(-102, 2, 10, 25));
-        staticObjects.add(new Coin(-103, 3, 10, 30));
-        staticObjects.add(new Coin(-104, 4, 10, 35));
-        staticObjects.add(new Coin(-105, 5, 10, 40));
-        staticObjects.add(new Coin(-106, 6, 20, 20));
-        staticObjects.add(new Coin(-107, 7, 20, 25));
-        staticObjects.add(new Coin(-108, 8, 20, 30));
-        staticObjects.add(new Coin(-109, 9, 20, 35));
-        staticObjects.add(new Coin(-110, 10, 20, 40));
+        staticObjects.add(new Coin(-101, 1, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-102, 2, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-103, 3, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-104, 4, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-105, 5, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-106, 6, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-107, 7, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-108, 8, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-109, 9, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-110, 10, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-111, 11, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-112, 12, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-113, 13, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-114, 14, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-115, 15, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-116, 16, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-117, 17, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-118, 18, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-119, 19, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-120, 20, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-121, 21, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-122, 22, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-123, 23, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-124, 24, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-125, 25, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-126, 26, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-127, 27, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-128, 28, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-129, 29, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-130, 30, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-131, 31, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-132, 32, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-133, 33, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-134, 34, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-135, 35, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-136, 36, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-137, 37, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-138, 38, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-139, 39, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-140, 40, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-141, 41, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-142, 42, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-143, 43, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-144, 44, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-145, 45, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-146, 46, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-147, 47, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-148, 48, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-149, 49, Math.random() * 100, Math.random() * 100));
+        staticObjects.add(new Coin(-150, 50, Math.random() * 100, Math.random() * 100));
     }
 
     public synchronized Message initializeStage(int playerID) {
@@ -131,8 +171,8 @@ public class Server extends BrokerCallBack {
                 } else if ("Coin".equals(type)) {
                     player.addCoin();
                     broker.send(playerStatus(id));
-                    double randX = Math.random() * 40.0;
-                    double randY = Math.random() * 40.0;
+                    double randX = Math.random() * 100.0;
+                    double randY = Math.random() * 100.0;
                     staticObject.move(randX, randY);
                     broker.sendBroadcast(moveCoin(player.getId(), staticObject));
                     return false;
@@ -146,7 +186,7 @@ public class Server extends BrokerCallBack {
         //checking the collision with aztects
         for (Aztec aztec : aztecs) {
             if (playerRectangle.intersects(aztec.getRectangle())) {
-                player.move(2, 2);
+                player.move(5, 20);
                 player.setHeading(0);
                 player.removeAllCoins();
                 broker.send(playerStatus(id));
@@ -203,6 +243,7 @@ public class Server extends BrokerCallBack {
         msg.setInteger("id", coin.getId());
         msg.setDouble("x", coin.getX());
         msg.setDouble("y", coin.getY());
+        msg.setInteger("h", 90);
 
         return msg;
     }

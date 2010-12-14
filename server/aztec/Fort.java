@@ -9,6 +9,6 @@ package aztec;
  */
 public class Fort extends StaticAztecObject {
     public Fort(double x, double y) {
-        super(0, "Fort", x, y, 5, 5);
+        super(0, "Fort", x, y, 30, 30);
     }
 }
