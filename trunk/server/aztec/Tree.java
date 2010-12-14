@@ -10,6 +10,6 @@ package aztec;
 public class Tree extends StaticAztecObject {
 
     public Tree(int id, double x, double y) {
-        super(id, "Tree", x, y, 1, 1);
+        super(id, "Tree", x, y, 2, 2);
     }
 }
