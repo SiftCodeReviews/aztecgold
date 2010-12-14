@@ -9,8 +9,8 @@ import broker.service.com.protocol.Message;
  * Time: 12:28:25 AM
  * To change this template use File | Settings | File Templates.
  */
-public class Player extends MovingObject {
-    public static final double VELOCITY = 1.0;
+public class Player extends MovableObject {
+    public static final double VELOCITY = .5;
     
     private boolean isOnline;
     private int score;
@@ -42,5 +42,18 @@ public class Player extends MovingObject {
 
     public int getCoins() {
         return coins;
+    }
+
+    public void addCoin() {
+        this.coins ++;
+    }
+
+    public void convertCoinsIntoScore() {
+        this.score += coins;
+        coins = 0;
+    }
+
+    public void removeAllCoins() {
+        this.coins = 0;
     }
 }
