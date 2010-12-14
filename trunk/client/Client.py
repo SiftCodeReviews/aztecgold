@@ -239,17 +239,18 @@ class AGClient(ShowBase):
     def createTree(self, xpos, ypos):
         mod = self.loader.loadModel("models/tree")
         mod.reparentTo(self.render)
-        mod.setPos(xpos +1,ypos,1)
+        mod.setPos(xpos,ypos-1,1)
         
         
     def createHut(self, xpos, ypos):
         mod = self.loader.loadModel("models/hut")
         mod.reparentTo(self.render)
-        mod.setPos(xpos,ypos,1)
+        mod.setPos(xpos,ypos-2,1)
         
     def createFort(self, xpos, ypos):
         mod = self.loader.loadModel("models/fort")
         mod.reparentTo(self.render)
+        mod.setScale(5.0, 5.0, 5.0)
         mod.setPos(xpos,ypos,1)
         
         
