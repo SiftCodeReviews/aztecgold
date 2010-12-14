@@ -32,7 +32,6 @@ public class Server extends BrokerCallBack {
     int numTrees = 5;
     int numHuts = 5;
     int numAztecs = 4;
-
     int numCoins = 10;
 
     private Server() {
@@ -95,7 +94,6 @@ public class Server extends BrokerCallBack {
         for (AztecObject staticObject : staticObjects) {
             staticObject.appendToMessage(msg);
         }
-
         //number of players which are currently active
         msg.setInteger("numPlayers", numPlayers);
 
@@ -105,14 +103,12 @@ public class Server extends BrokerCallBack {
                 p.appendToMessage(msg, counter++);
             }
         }
-
         //aztecs
         msg.setInteger("numAztecs", numAztecs);
 
         for (Aztec aztec : aztecs) {
             aztec.appendToMessage(msg);
         }
-
         return msg;
     }
 
@@ -124,7 +120,7 @@ public class Server extends BrokerCallBack {
 
         for (AztecObject staticObject : staticObjects) {
             if (playerRectangle.intersects(staticObject.getRectangle())) {
-                System.out.println("[Server] Collision with " + staticObject.getType() + " detected");
+                //System.out.println("[Server] Collision with " + staticObject.getType() + " detected");
                 String type = staticObject.getType();
                 if ("Tree".equals(type) || "Hut".equals(type) || "Fort".equals(type)) {
                     return true;
