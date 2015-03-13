@@ -1,0 +1,1 @@
+Aztec Gold is a 3D multiplayer game, where player have to collect gold coins while Aztecs attack them with spears. Getting hit by the Aztec’s spears reduces the amount of collected coins, to avoid this, the player have to safely store the coins in a chest located at their base. Multiple players compete for the highest amount of coins collected.
